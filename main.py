@@ -1,32 +1,28 @@
-from basicGates import And, Or, Not, Nand, Nor, Xor, Xnor
+from Part import Part
+from Gates import And, Or, Not, Nand, Nor, Xor, Xnor
+from Latch import SRLatch, GatedLatch, DataLatch
+from FlipFlop import FlipFlop, DFlipFlop
+from Adder import HalfAdder, FullAdder
 
-# class 
-
-def TestGate(gate):
-	print(f"gate: {gate.__class__.__name__}")
-	if gate.numInputs == 1:
-		print("A | Q")
-	else:
-		print("A | B | Q")
-
-	for i in range(0, 2 ** gate.numInputs):
-		
-		inValues = []
-		for bitPos in range(0, gate.numInputs):
-			inValues.insert(0, (i >> bitPos) & 0x01)
-		
-		gate.setInput(*inValues)
-		gate.process()
-		
-		print(gate)
-
+from TestUtils import TestPart, TestFlipFlop
 
 if __name__ == "__main__":
 	print("Hello, world!")
-	TestGate(And())
-	TestGate(Or())
-	TestGate(Not())
-	TestGate(Nand())
-	TestGate(Nor())
-	TestGate(Xor())
-	TestGate(Xnor())
+
+	TestPart(And())
+	TestPart(Or())
+	TestPart(Not())
+	TestPart(Nand())
+	TestPart(Nor())
+	TestPart(Xor())
+	TestPart(Xnor())
+
+	TestPart(SRLatch())
+	TestPart(GatedLatch())
+	TestPart(DataLatch())
+
+	TestPart(HalfAdder())
+	TestPart(FullAdder())
+
+	TestFlipFlop(FlipFlop())
+	TestFlipFlop(DFlipFlop())
