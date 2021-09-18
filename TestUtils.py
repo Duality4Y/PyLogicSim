@@ -2,7 +2,7 @@ def getPulseShape(risingPulse):
 	return [0, 1, 0] if risingPulse else [1, 0, 1]
 
 def TestPart(part):
-	print("Testing the {0} part.".format(part.name))
+	print("Testing '{0}' part.".format(part.name))
 	print(part.getLineTable())
 	for i in range(0, 2 ** part.numInputs):
 		inValues = []
@@ -16,13 +16,16 @@ def TestPart(part):
 def ToggleClk(part, risingPulse=True):
 	pulseShape = getPulseShape(risingPulse)
 	for clkstate in pulseShape:
-		part.Clk = clkstate
+		if hasattr(part, "Clk"):
+			part.Clk = clkstate # normal flipflops have a clk input
+		elif hasattr(part, "T"):
+			part.T = clkstate # toggle flipflop has a T which is basically a clock input too
 		part.process()
 		print(part)
 
 def TestFlipFlop(part):
-	print("Testing the {0} part.".format(part.name))
-	for i in range(0, 2 ** (part.numInputs - 1)):
+	print("Testing '{0}' part.".format(part.name))
+	for i in range(0, 2 ** (part.numInputs)):
 		inValues = []
 		for bitPos in range(0, part.numInputs):
 			inValues.insert(0, (i >> bitPos) & 0x01)

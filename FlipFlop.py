@@ -127,3 +127,36 @@ class DFlipFlop(Part):
 	def __repr__(self):
 		states = [self.Clk, self.Data, self.Q, self.Qn]
 		return self.buildTable(states)
+
+class TFlipFlop(Part):
+	def __init__(self):
+		self.dFlipFlop = DFlipFlop()
+
+		super().__init__(numInputs=1, numOutputs=1,
+						 name=TFlipFlop.__name__,
+						 lines=["T", "Q"])
+
+	@property
+	def T(self):
+		return self.dFlipFlop.Clk
+	@T.setter
+	def T(self, value):
+		self.dFlipFlop.Clk = value
+
+	@property
+	def Q(self):
+		return self.dFlipFlop.Q
+
+	def setInput(self, T):
+		self.T = T
+
+	def getOutput(self):
+		return (self.Q)
+
+	def process(self):
+		self.dFlipFlop.Data = self.dFlipFlop.Qn
+		self.dFlipFlop.process()
+
+	def __repr__(self):
+		states = [self.T, self.Q]
+		return self.buildTable(states)
