@@ -1,6 +1,6 @@
 This is python code to simulate logic
 
-== Running ==
+# Running The program.
 
 to run it:
 ```bash
@@ -163,6 +163,6 @@ T |Q
 
 ```
 
-== Todo ==
+# Todo
 
 Alot
