@@ -1,7 +1,7 @@
 from Part import Part
 from Gates import And, Or, Not, Nand, Nor, Xor, Xnor
 from Latch import SRLatch, GatedLatch, DataLatch
-from FlipFlop import FlipFlop, DFlipFlop
+from FlipFlop import FlipFlop, DFlipFlop, TFlipFlop
 from Adder import HalfAdder, FullAdder
 
 from TestUtils import TestPart, TestFlipFlop
