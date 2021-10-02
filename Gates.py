@@ -70,6 +70,24 @@ class Not(Part):
 		states = [self.A, self.Q]
 		return self.buildTable(states)
 
+class Buffer(Part):
+	def __init__(self):
+		self.A = 0
+		self.Q = 0
+
+		super().__init__(numInputs=1, numOutputs=1,
+						 name="Buffer",
+						 lines=["A", "Q"])
+	def setInput(self, A):
+		self.A = A
+
+	def process(self):
+		self.Q = self.A
+
+	def __repr__(self):
+		states = [self.A, self.Q]
+		return self.buildTable(states)
+
 class Nand(Part):
 	def __init__(self):
 		self.notGate = Not()

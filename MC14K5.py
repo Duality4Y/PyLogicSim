@@ -1,0 +1,363 @@
+from Part import Part
+from Gates import Not, And, Or, Nor, Buffer
+
+class LogicUnit(Part):
+	def __init__(self):
+		self.notData = Not()
+		self.notResult = Not()
+
+		self.andGate1 = And()
+		self.andGate2 = And()
+		self.andGate3 = And()
+		self.orGate1 = Or()
+		self.orGate2 = Or()
+		self.orGate3 = Or()
+
+		self.andGate4 = And()
+		self.andGate5 = And()
+		self.andGate6 = And()
+		self.orGate4 = Or()
+		self.orGate5 = Or()
+
+		super().__init__(numInputs=9, numOutputs=1,
+				 name="LogicUnit",
+				 lines=["RIn",
+				 		"Data",
+				 		"ROut",
+				 		"LD/OR", "LDC/ORC", "AND/XNOR", "ANDC", "OR/ORC", "XNOR"])
+	@property
+	def Data(self):
+		return self.andGate6.B
+	@Data.setter
+	def Data(self, value):
+		self.andGate6.B = value
+	
+	@property
+	def RIn(self):
+		return self.andGate1.B
+	@RIn.setter
+	def RIn(self, value):
+		self.andGate1.B = value
+		self.andGate3.B = value
+		self.andGate5.B = value
+	
+	@property
+	def ROut(self):
+		return self.orGate4.Q
+	
+	@property
+	def LD_OR(self):
+		return self.orGate3.A
+	@LD_OR.setter
+	def LD_OR(self, value):
+		self.orGate3.A = value
+	
+	@property
+	def LDC_ORC(self):
+		return self.orGate1.A
+	@LDC_ORC.setter
+	def LDC_ORC(self, value):
+		self.orGate1.A = value
+	
+	@property
+	def AND_XNOR(self):
+		return self.andGate3.A
+	@AND_XNOR.setter
+	def AND_XNOR(self, value):
+		self.andGate3.A = value
+	
+	@property
+	def ANDC(self):
+		return self.andGate1.A
+	@ANDC.setter
+	def ANDC(self, value):
+		self.andGate1.A = value
+	
+	@property
+	def OR_ORC(self):
+		return self.andGate5.A
+	@OR_ORC.setter
+	def OR_ORC(self, value):
+		self.andGate5.A = value
+	
+	@property
+	def XNOR(self):
+		return self.andGate2.A
+	@XNOR.setter
+	def XNOR(self, value):
+		self.andGate2.A = value
+
+	def setInput(self, RIn, Data, LD_OR, LDC_ORC, AND_XNOR, ANDC, OR_ORC, XNOR):
+		self.Data = Data
+		self.RIn = RIn
+		self.LD_OR = LD_OR
+		self.LDC_ORC = LDC_ORC
+		self.AND_XNOR = AND_XNOR
+		self.ANDC = ANDC
+		self.OR_ORC = OR_ORC
+		self.XNOR = XNOR
+
+	def getOutput(self):
+		return self.ROut
+
+	def process(self):
+		self.notData.A = self.Data
+		self.notData.process()
+		self.notResult.A = self.RIn
+		self.notResult.process()
+
+		self.andGate1.process()
+
+		self.andGate2.B = self.notResult.Q
+		self.andGate2.process()
+
+		self.andGate3.process()
+
+		self.orGate2.A = self.andGate1.Q
+		self.orGate2.B = self.andGate2.Q
+		self.orGate2.process()
+
+		self.orGate3.B = self.andGate3.Q
+		self.orGate3.process()
+
+		self.orGate1.B = self.orGate2.Q
+		self.orGate1.process()
+
+		self.andGate4.A = self.orGate1.Q
+		self.andGate4.B = self.notData.Q
+		self.andGate4.process()
+
+		self.andGate5.process()
+
+		self.andGate6.A = self.orGate3.Q
+		self.andGate6.process()
+
+		self.orGate5.A = self.andGate5.Q
+		self.orGate5.B = self.andGate6.Q
+		self.orGate5.process()
+
+		self.orGate4.A = self.andGate4.Q 
+		self.orGate4.B = self.orGate5.Q
+		self.orGate4.process()
+
+	def __repr__(self):
+		states = [self.RIn, self.Data, self.ROut,
+				  self.LD_OR, self.LDC_ORC, self.AND_XNOR, self.ANDC, self.OR_ORC, self.XNOR]
+		return self.buildTable(states)
+
+class Decoder(Part):
+	def __init__(self, lineEncoder3=Buffer(), lineEncoder2=Buffer(), lineEncoder1=Buffer(), lineEncoder0=Buffer()):
+		self.lineEncoder0 = lineEncoder0
+		self.lineEncoder1 = lineEncoder1
+		self.lineEncoder2 = lineEncoder2
+		self.lineEncoder3 = lineEncoder3
+
+		self.norGate1 = Nor()
+		self.norGate2 = Nor()
+		self.andGate = And()
+
+		super().__init__(numInputs=4, numOutputs=1,
+						 name="Decoder",
+						 lines=["I3", "I2", "I1", "I0", "Q"])
+	@property
+	def I3(self):
+		return self.lineEncoder3.A
+	@I3.setter
+	def I3(self, value):
+		self.lineEncoder3.A = value
+	@property
+	def I2(self):
+		return self.lineEncoder2.A
+	@I2.setter
+	def I2(self, value):
+		self.lineEncoder2.A = value
+	@property
+	def I1(self):
+		return self.lineEncoder1.A
+	@I1.setter
+	def I1(self, value):
+		self.lineEncoder1.A = value
+	@property
+	def I0(self):
+		return self.lineEncoder0.A
+	@I0.setter
+	def I0(self, value):
+		self.lineEncoder0.A = value
+
+	@property
+	def Q(self):
+		return self.andGate.Q
+
+	def setInput(self, I3, I2, I1, I0):
+		self.I3 = I3
+		self.I2 = I2
+		self.I1 = I1
+		self.I0 = I0
+
+	def process(self):
+		self.lineEncoder0.process()
+		self.lineEncoder1.process()
+		self.lineEncoder2.process()
+		self.lineEncoder3.process()
+
+		self.norGate1.A = self.lineEncoder0.Q
+		self.norGate1.B = self.lineEncoder1.Q
+		self.norGate2.A = self.lineEncoder2.Q
+		self.norGate2.B = self.lineEncoder3.Q
+		self.norGate1.process()
+		self.norGate2.process()
+
+		self.andGate.A = self.norGate1.Q
+		self.andGate.B = self.norGate2.Q
+		self.andGate.process()
+
+	def __repr__(self):
+		self.states = [self.I3, self.I2, self.I1, self.I0, self.Q]
+		return self.buildTable(self.states)
+
+class InstrDecoder(Part):
+	def __init__(self):
+		self.decoders = []
+		for i in range(0, 16):
+			S3 = (i >> 3) & 0x01
+			S2 = (i >> 2) & 0x01
+			S1 = (i >> 1) & 0x01
+			S0 = i & 0x01
+			selectLines = [Not() if select else Buffer() for select in [S3, S2, S1, S0]]
+			decoder = Decoder(*selectLines)
+			self.decoders.append(decoder)
+
+		super().__init__(numInputs=4, numOutputs=16,
+						 name="InstrDecoder",
+						 lines=["I3", "I2", "I1", "I0",
+						 		"NOPO", "LD", "LDC", "AND",
+								"ANDC", "OR", "ORC", "XNOR",
+								"STO", "STOC", "IEN", "OEN",
+								"JMP", "RTN", "SKZ", "NOPF"])
+	@property
+	def I3(self):
+		return self.decoders[0].I3
+	@property
+	def I2(self):
+		return self.decoders[0].I2
+	@property
+	def I1(self):
+		return self.decoders[0].I1
+	@property
+	def I0(self):
+		return self.decoders[0].I0
+	@I3.setter
+	def I3(self, value):
+		for decoder in self.decoders:
+			decoder.I3 = value
+	@I2.setter
+	def I2(self, value):
+		for decoder in self.decoders:
+			decoder.I2 = value
+	@I1.setter
+	def I1(self, value):
+		for decoder in self.decoders:
+			decoder.I1 = value
+	@I0.setter
+	def I0(self, value):
+		for decoder in self.decoders:
+			decoder.I0 = value
+
+	@property
+	def NOPO(self):
+		return self.decoders[0].Q
+	@property
+	def LD(self):
+		return self.decoders[1].Q
+	@property
+	def LDC(self):
+		return self.decoders[2].Q
+	@property
+	def AND(self):
+		return self.decoders[3].Q
+	@property
+	def ANDC(self):
+		return self.decoders[4].Q
+	@property
+	def OR(self):
+		return self.decoders[5].Q
+	@property
+	def ORC(self):
+		return self.decoders[6].Q
+	@property
+	def XNOR(self):
+		return self.decoders[7].Q
+	@property
+	def STO(self):
+		return self.decoders[8].Q
+	@property
+	def STOC(self):
+		return self.decoders[9].Q
+	@property
+	def IEN(self):
+		return self.decoders[10].Q
+	@property
+	def OEN(self):
+		return self.decoders[11].Q
+	@property
+	def JMP(self):
+		return self.decoders[12].Q
+	@property
+	def RTN(self):
+		return self.decoders[13].Q
+	@property
+	def SKZ(self):
+		return self.decoders[14].Q
+	@property
+	def NOPF(self):
+		return self.decoders[15].Q
+
+	def setInput(self, *args):
+		for decoder in self.decoders:
+			decoder.setInput(*args)
+
+	def process(self):
+		for decoder in self.decoders:
+			decoder.process()
+
+	def __repr__(self):
+		states = [self.I3, self.I2, self.I1, self.I0] + [decoder.Q for decoder in self.decoders]
+		return self.buildTable(states)
+
+class InstrRegister(Part):
+	def __init__(self):
+		super().__init__(numInputs=5, numOutputs=4,
+						 name="Instruction Register",
+						 lines=["I0", "I1", "I2", "I3", "Q3", "Q2", "Q1", "Q0"])
+
+class ControlUnit(Part):
+	def __init__(self):
+		super().__init__(numInputs=10, numOutputs=4,
+					   name="MC14500")
+
+
+def TestLU():
+	inputTable = [("LD",   [1, 0, 0, 0, 0, 0]), # LD
+				  ("OR",   [1, 0, 0, 0, 1, 0]), # OR
+				  ("LDC",  [0, 1, 0, 0, 0, 0]), # LDC
+				  ("ORC",  [0, 1, 0, 0, 1, 0]), # ORC
+				  ("AND",  [0, 0, 1, 0, 0, 0]), # AND
+				  ("XNOR", [0, 0, 1, 0, 0, 1]), # XNOR
+				  ("ANDC", [0, 0, 0, 1, 0, 0]), # ANDC
+				  ]
+
+	logicUnit = LogicUnit()
+	print("Testing '{0}' part.".format(logicUnit.name))
+
+	for name, inputSet in inputTable:
+		print("Testing '{0}' functionality".format(name))
+		print(logicUnit.getLineTable())
+		for i in range(0, 4):
+			Data = (i & 0x01)
+			RIn = (i >> 1) & 0x01
+			# print([Data, RIn] + inputSet)
+			inputs = [RIn, Data] + inputSet
+			logicUnit.setInput(*inputs)
+			logicUnit.process()
+			print(logicUnit)
+		print()
