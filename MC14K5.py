@@ -1,5 +1,6 @@
 from Part import Part
 from Gates import Not, And, Or, Nor, Buffer
+from FlipFlop import DFlipFlop
 
 class LogicUnit(Part):
 	def __init__(self):
@@ -324,8 +325,84 @@ class InstrDecoder(Part):
 		states = [self.I3, self.I2, self.I1, self.I0] + [decoder.Q for decoder in self.decoders]
 		return self.buildTable(states)
 
+class Mux(Part):
+	def __init__(self):
+		self.andGate1 = And()
+		self.andGate2 = And()
+		self.andGate3 = And()
+		self.andGate4 = And()
+		self.notGate1 = Not()
+		self.notGate2 = Not()
+		self.orGate1 = Or()
+
+		super().__init__(numInputs=4, numOutputs=1,
+						 name="Mux",
+						 lines=["A", "B", "S0", "S1", "Q"])
+
+	@property
+	def A(self):
+		return self.andGate1.A
+	@A.setter
+	def A(self, value):
+		self.andGate1.A = value
+	@property
+	def B(self):
+		return self.andGate2.B
+	@B.setter
+	def B(self, value):
+		self.andGate2.B = value
+
+	@property
+	def S0(self):
+		return self.andGate1.B
+	@S0.setter
+	def S0(self, value):
+		self.andGate1.B = value
+	@property
+	def S1(self):
+		return self.andGate4.A
+	@S1.setter
+	def S1(self, value):
+		self.andGate4.A = value
+	@property
+	def Q(self):
+		return self.orGate1.Q
+
+	def setInput(self, A, B, S0, S1):
+		self.A = A
+		self.B = B
+		self.S0 = S0
+		self.S1 = S1
+
+	def process(self):
+		self.notGate1.A = self.S1
+		self.notGate2.A = self.S0
+		self.notGate1.process()
+		self.notGate2.process()
+
+		self.andGate1.process()
+		self.andGate2.A = self.notGate2.Q
+		self.andGate2.process()
+
+		self.andGate3.A = self.andGate1.Q
+		self.andGate3.B = self.notGate1.Q
+		self.andGate3.process()
+
+		self.andGate4.B = self.andGate2.Q
+		self.andGate4.process()
+
+		self.orGate1.A = self.andGate3.Q
+		self.orGate1.B = self.andGate4.Q
+		self.orGate1.process()
+
+
+	def __repr__(self):
+		states = [self.A, self.B, self.S0, self.S1, self.Q]
+		return self.buildTable(states)
+
 class InstrRegister(Part):
 	def __init__(self):
+		self.registers = [DFlipFlop()]
 		super().__init__(numInputs=5, numOutputs=4,
 						 name="Instruction Register",
 						 lines=["I0", "I1", "I2", "I3", "Q3", "Q2", "Q1", "Q0"])
