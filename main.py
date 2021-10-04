@@ -40,6 +40,8 @@ if __name__ == "__main__":
 
 	MC14K5.TestLU()
 	TestPart(MC14K5.Decoder())
-	TestPart(MC14K5.InstrDecoder())
 	TestPart(MC14K5.Mux())
-	# TestPart(MC14K5.InstrRegister())
+	TestPart(MC14K5.InstrDecoder())
+	TestPart(MC14K5.InstrRegister())
+	TestFlipFlop(MC14K5.InstrRegister())
+	TestPart(MC14K5.ControlUnit())

@@ -78,7 +78,7 @@ class DFlipFlop(Part):
 		self.process()
 
 		super().__init__(numInputs=2, numOutputs=2,
-						 name=FlipFlop.__name__,
+						 name=DFlipFlop.__name__,
 						 lines=["Clk", "Data", "Q", "Qn"])
 	
 	@property

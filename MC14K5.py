@@ -402,15 +402,155 @@ class Mux(Part):
 
 class InstrRegister(Part):
 	def __init__(self):
-		self.registers = [DFlipFlop()]
+		self.registers = [DFlipFlop() for i in range(0, 4, 1)]
 		super().__init__(numInputs=5, numOutputs=4,
 						 name="Instruction Register",
-						 lines=["I0", "I1", "I2", "I3", "Q3", "Q2", "Q1", "Q0"])
+						 lines=["Clk", "I3", "I2", "I1", "I0", "Q3", "Q2", "Q1", "Q0"])
+	
+	@property
+	def Clk(self):
+		return self.registers[0].Clk
+	@Clk.setter
+	def Clk(self, value):
+		for register in self.registers:
+			register.Clk = value
+
+	@property
+	def I0(self):
+		return self.registers[0].Data
+	@I0.setter
+	def I0(self, value):
+		self.registers[0].Data = value
+	@property
+	def I1(self):
+		return self.registers[1].Data
+	@I1.setter
+	def I1(self, value):
+		self.registers[1].Data = value
+	@property
+	def I2(self):
+		return self.registers[2].Data
+	@I2.setter
+	def I2(self, value):
+		self.registers[2].Data = value
+	@property
+	def I3(self):
+		return self.registers[3].Data
+	@I3.setter
+	def I3(self, value):
+		self.registers[3].Data = value
+	
+	@property
+	def Q0(self):
+		return self.registers[0].Q
+	@property
+	def Q1(self):
+		return self.registers[1].Q
+	@property
+	def Q2(self):
+		return self.registers[2].Q
+	@property
+	def Q3(self):
+		return self.registers[3].Q
+
+	def setInput(self, Clk, I3, I2, I1, I0):
+		self.Clk = Clk
+		self.I0 = I0
+		self.I1 = I1
+		self.I2 = I2
+		self.I3 = I3
+
+	def process(self):
+		for register in self.registers:
+			register.process()
+
+	def __repr__(self):
+		states = [self.Clk, self.I3, self.I2, self.I1, self.I0, self.Q3, self.Q2, self.Q1, self.Q0]
+		return self.buildTable(states)
+
+
 
 class ControlUnit(Part):
 	def __init__(self):
-		super().__init__(numInputs=10, numOutputs=4,
-					   name="MC14500")
+		self.andGate1 = And()
+		self.andGate2 = And()
+		self.notGate1 = Not()
+		self.IENRegister = DFlipFlop()
+		self.OENRegister = DFlipFlop()
+		self.ResultRegister = DFlipFlop()
+		self.instrRegister = InstrRegister()
+		self.instrDecoder = InstrDecoder()
+		self.logicUnit = LogicUnit()
+		self.mux = Mux()
+
+		super().__init__(numInputs=6, numOutputs=7,
+					   name="MC14500 ControlUnit",
+					   lines=["Clk", "Data", "I3", "I2", "I1", "I0",
+					   		  "Write", "RR", "JMP", "RTN", "FLAG_O", "FLAG_F", "SKIP"])
+	@property
+	def Clk(self):
+		return 0
+	@Clk.setter
+	def Clk(self, value):
+		pass
+	@property
+	def Data(self):
+		return 0
+	@Data.setter
+	def Data(self, value):
+		pass
+	@property
+	def I3(self):
+		return 0
+	@I3.setter
+	def I3(self, value):
+		pass
+	@property
+	def I2(self):
+		return 0
+	@I2.setter
+	def I2(self, value):
+		pass
+	@property
+	def I1(self):
+		return 0
+	@I1.setter
+	def I1(self, value):
+		pass
+	@property
+	def I0(self):
+		return 0
+	@I0.setter
+	def I0(self, value):
+		pass
+
+	@property
+	def Write(self):
+		return 0
+	@property
+	def RR(self):
+		return 0
+	@property
+	def JMP(self):
+		return 0
+	@property
+	def RTN(self):
+		return 0
+	@property
+	def FLAG_O(self):
+		return 0
+	@property
+	def FLAG_F(self):
+		return 0
+	@property
+	def SKIP(self):
+		return 0
+
+
+
+	def __repr__(self):
+		states = [0] * (self.numInputs + 2)
+		return self.buildTable(states)
 
 
 def TestLU():
