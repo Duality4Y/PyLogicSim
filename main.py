@@ -38,10 +38,36 @@ if __name__ == "__main__":
 	TestMux(Mux())
 	TestPart(DeMux())
 
+	def numToBits(length, number):
+		return [(number >> (length - i - 1)) & 0x01 for i in range(0, length)]
+
+	def clockMC14K5(part):
+		part.Clk = 1
+		part.process()
+		part.Clk = 0
+		part.process()
+		part.printStates()
+
 	MC14K5.TestLU()
 	TestPart(MC14K5.Decoder())
 	TestPart(MC14K5.Mux())
 	TestPart(MC14K5.InstrDecoder())
 	TestPart(MC14K5.InstrRegister())
 	TestFlipFlop(MC14K5.InstrRegister())
-	TestPart(MC14K5.ControlUnit())
+	# TestPart(MC14K5.ControlUnit())
+	control = MC14K5.ControlUnit()
+
+	print("Input Enable by setting data and giving the IEN instruction")
+	control.setInput(0, 1, *numToBits(4, 10))
+	clockMC14K5(control)
+	print("different instruction so that IEN will fall low and clock in data.")
+	control.setInput(0, 1, *numToBits(4, 0))
+	clockMC14K5(control)
+
+	print("execute OR so that result of LU will be 1 and see if we can clock it into the RR register.")
+	control.setInput(0, 1, *numToBits(4, 5))
+	clockMC14K5(control)
+	print("another clock pulse to actually put it in the ResultRegister")
+	clockMC14K5(control)
+	# control.setInput(0, 1, *numToBits(4, 0))
+	# clockMC14K5(control)

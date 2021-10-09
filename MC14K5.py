@@ -1,6 +1,7 @@
 from Part import Part
 from Gates import Not, And, Or, Nor, Buffer
 from FlipFlop import DFlipFlop
+from Latch import DataLatch
 
 class LogicUnit(Part):
 	def __init__(self):
@@ -475,81 +476,172 @@ class ControlUnit(Part):
 		self.andGate1 = And()
 		self.andGate2 = And()
 		self.notGate1 = Not()
-		self.IENRegister = DFlipFlop()
-		self.OENRegister = DFlipFlop()
+		
+		self.JmpLatch = DataLatch()
+		self.RtnLatch = DataLatch()
+		self.FlagOLatch = DataLatch()
+		self.FlagFLatch = DataLatch()
+		self.SkipLatch = DataLatch()
+
+		self.DataInRegister = DFlipFlop()
+		self.DataOutRegister = DFlipFlop()
 		self.ResultRegister = DFlipFlop()
-		self.instrRegister = InstrRegister()
+		self.InstrRegister = InstrRegister()
+
 		self.instrDecoder = InstrDecoder()
 		self.logicUnit = LogicUnit()
 		self.mux = Mux()
 
+		self.clockedParts = [self.JmpLatch, self.RtnLatch, self.FlagOLatch, self.FlagFLatch, self.SkipLatch,
+							 self.ResultRegister, self.InstrRegister]
+
+		self.resetableParts = [self.JmpLatch, self.RtnLatch, self.FlagOLatch, self.FlagFLatch,
+							   self.SkipLatch, self.DataInRegister, self.DataOutRegister,
+							   self.ResultRegister, self.InstrRegister]
+
 		super().__init__(numInputs=6, numOutputs=7,
 					   name="MC14500 ControlUnit",
 					   lines=["Clk", "Data", "I3", "I2", "I1", "I0",
-					   		  "Write", "RR", "JMP", "RTN", "FLAG_O", "FLAG_F", "SKIP"])
+					   		  "Write", "RR", "JMP", "RTN", "FLAG_O", "FLAG_F", "SKIP", "Reset"])
 	@property
 	def Clk(self):
-		return 0
+		return self.JmpLatch.Clk
 	@Clk.setter
 	def Clk(self, value):
-		pass
+		for clockedPart in self.clockedParts:
+			clockedPart.Clk = value
+
+	@property
+	def Reset(self):
+		return self.JmpLatch.Q
+	@Reset.setter
+	def Reset(self, value):
+		for resetablePart in self.resetableParts:
+			resetablePart.Reset = value
+
 	@property
 	def Data(self):
-		return 0
+		return self.DataInRegister.Data
 	@Data.setter
 	def Data(self, value):
-		pass
+		self.DataInRegister.Data = value
+		self.DataOutRegister.Data = value
+		self.andGate1.A = value
 	@property
 	def I3(self):
-		return 0
+		return self.InstrRegister.I3
 	@I3.setter
 	def I3(self, value):
-		pass
+		self.InstrRegister.I3 = value
 	@property
 	def I2(self):
-		return 0
+		return self.InstrRegister.I2
 	@I2.setter
 	def I2(self, value):
-		pass
+		self.InstrRegister.I2 = value
 	@property
 	def I1(self):
-		return 0
+		return self.InstrRegister.I1
 	@I1.setter
 	def I1(self, value):
-		pass
+		self.InstrRegister.I1 = value
 	@property
 	def I0(self):
-		return 0
+		return self.InstrRegister.I0
 	@I0.setter
 	def I0(self, value):
-		pass
+		self.InstrRegister.I0 = value
 
 	@property
 	def Write(self):
-		return 0
+		return self.andGate2.Q
 	@property
 	def RR(self):
-		return 0
+		return self.notGate1.Q
 	@property
 	def JMP(self):
-		return 0
+		return self.JmpLatch.Q
 	@property
 	def RTN(self):
-		return 0
+		return self.RtnLatch.Q
 	@property
 	def FLAG_O(self):
-		return 0
+		return self.FlagOLatch.Q
 	@property
 	def FLAG_F(self):
-		return 0
+		return self.FlagFLatch.Q
 	@property
 	def SKIP(self):
-		return 0
+		return self.SkipLatch.Q
 
+	def setInput(self, Clk, Data, I3, I2, I1, I0):
+		self.Clk = Clk
+		self.Data = Data
+		self.I3 = I3
+		self.I2 = I2
+		self.I1 = I1
+		self.I0 = I0
 
+	def debugPrint(self, part):
+		print("part: {0}".format(part.name))
+		print(part.getLineTable())
+		print(part)
+
+	def printStates(self):
+		self.debugPrint(self)
+		self.debugPrint(self.InstrRegister)
+		self.debugPrint(self.instrDecoder)
+		self.debugPrint(self.DataInRegister)
+		self.debugPrint(self.andGate1)
+		self.debugPrint(self.logicUnit)
+		self.debugPrint(self.ResultRegister)
+		print('\n' * 3)
+
+	def process(self):
+		self.InstrRegister.process()
+
+		self.instrDecoder.I3 = self.InstrRegister.Q3
+		self.instrDecoder.I2 = self.InstrRegister.Q2
+		self.instrDecoder.I1 = self.InstrRegister.Q1
+		self.instrDecoder.I0 = self.InstrRegister.Q0
+		self.instrDecoder.process()
+
+		self.DataInRegister.Clk = self.instrDecoder.IEN
+		self.DataInRegister.process()
+
+		self.andGate1.B = self.DataInRegister.Q
+		self.andGate1.process()
+
+		self.logicUnit.Data = self.andGate1.Q
+		self.logicUnit.LD_OR = self.instrDecoder.LD | self.instrDecoder.OR
+		self.logicUnit.LDC_ORC = self.instrDecoder.LDC | self.instrDecoder.ORC
+		self.logicUnit.AND_XNOR = self.instrDecoder.AND | self.instrDecoder.XNOR
+		self.logicUnit.ANDC = self.instrDecoder.ANDC
+		self.logicUnit.OR_ORC = self.instrDecoder.OR | self.instrDecoder.ORC
+		self.logicUnit.XNOR = self.instrDecoder.XNOR
+		self.logicUnit.process()
+
+		self.ResultRegister.Data = self.logicUnit.ROut
+		self.ResultRegister.process()
+		self.logicUnit.RIn = self.ResultRegister.Q
+
+		self.notGate1.A = self.ResultRegister.Qn
+		self.notGate1.process()
+		
+		# num = self.I0 | (self.I1 << 1) | (self.I2 << 2) | (self.I3 << 3)
+		# if num < 8:
+		# 	print(self.andGate1.getLineTable())
+		# 	print(self.andGate1)
+		# 	print(self.InstrRegister.getLineTable())
+		# 	print(self.InstrRegister)
+		# 	print(self.instrDecoder.getLineTable())
+		# 	print(self.instrDecoder)
+		# 	print(self.logicUnit.getLineTable())
+		# 	print(self.logicUnit)
 
 	def __repr__(self):
-		states = [0] * (self.numInputs + 2)
+		states = [self.Clk, self.Data, self.I3, self.I2, self.I1, self.I0,
+				  self.Write, self.RR, self.JMP, self.RTN, self.FLAG_O, self.FLAG_F, self.SKIP, self.Reset]
 		return self.buildTable(states)
 
 
