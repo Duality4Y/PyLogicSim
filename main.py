@@ -46,6 +46,7 @@ if __name__ == "__main__":
 		part.process()
 		part.Clk = 0
 		part.process()
+
 		part.printStates()
 
 	class Instructions(object):
@@ -79,9 +80,32 @@ if __name__ == "__main__":
 	# TestPart(MC14K5.ControlUnit())
 	control = MC14K5.ControlUnit()
 
-	print("input enable.")
+	print("-> input enable.")
 	control.setInput(0, 1, *numToBits(4, instr.IEN))
 	clockMC14K5(control)
+	
+	print("-> LD(1) and STO(1) test.")
+	control.setInput(0, 1, *numToBits(4, instr.LD))
+	clockMC14K5(control)
+	control.setInput(0, 1, *numToBits(4, instr.STO))
+	clockMC14K5(control)
+	print("-> LD(0) and STO(0) test.")
+	control.setInput(0, 0, *numToBits(4, instr.LD))
+	clockMC14K5(control)
+	control.setInput(0, 1, *numToBits(4, instr.STO))
+	clockMC14K5(control)
+
+	print("-> LD(1) and STOC(1) test.")
+	control.setInput(0, 1, *numToBits(4, instr.LD))
+	clockMC14K5(control)
+	control.setInput(0, 1, *numToBits(4, instr.STOC))
+	clockMC14K5(control)
+	print("-> LD(0) and STOC(0) test.")
+	control.setInput(0, 0, *numToBits(4, instr.LD))
+	clockMC14K5(control)
+	control.setInput(0, 1, *numToBits(4, instr.STOC))
+	clockMC14K5(control)
+
 
 
 	# print("load 1 into result register")
