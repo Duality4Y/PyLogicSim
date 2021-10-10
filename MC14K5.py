@@ -476,7 +476,7 @@ class DInRegister(Part):
 		self.notGate = Not()
 		super().__init__(numInputs=2, numOutputs=1,
 						 name="Data In Register",
-						 lines=["Data", "IEN", "Q"])
+						 lines=["Clk", "Data", "<Qr>", "Q"])
 	@property
 	def Data(self):
 		return self.reg.Data
@@ -485,10 +485,10 @@ class DInRegister(Part):
 		self.reg.Data = value
 	
 	@property
-	def IEN(self):
+	def Clk(self):
 		return self.notGate.A
-	@IEN.setter
-	def IEN(self, value):
+	@Clk.setter
+	def Clk(self, value):
 		self.notGate.A = value
 
 	@property
@@ -506,7 +506,86 @@ class DInRegister(Part):
 		self.andGate.process()
 
 	def __repr__(self):
-		states = [self.Data, self.IEN, self.Q]
+		states = [self.Clk, self.Data, self.reg.Q, self.Q]
+		return self.buildTable(states)
+
+class DOutRegister(Part):
+	def __init__(self):
+		self.reg = DFlipFlop()
+		self.notGate = Not()
+		super().__init__(numInputs=2, numOutputs=1,
+						 name="Data In Register",
+						 lines=["Data", "CLK", "Q"])
+	@property
+	def Data(self):
+		return self.reg.Data
+	@Data.setter
+	def Data(self, value):
+		self.reg.Data = value
+	
+	@property
+	def Clk(self):
+		return self.notGate.A
+	@Clk.setter
+	def Clk(self, value):
+		self.notGate.A = value
+
+	@property
+	def Q(self):
+		return self.reg.Q
+
+	@property
+	def Qn(self):
+		return self.reg.Qn
+
+	def process(self):
+		self.notGate.process()
+
+		self.reg.Clk = self.notGate.Q
+		self.reg.process()
+
+	def __repr__(self):
+		states = [self.Data, self.IEN, self.reg.Q, self.Q]
+		return self.buildTable(states)
+
+class ResultRegister(Part):
+	def __init__(self):
+		self.reg = DFlipFlop()
+		self.andGate = And()
+		self.notGate = Not()
+		super().__init__(numInputs=2, numOutputs=1,
+						 name="Data In Register",
+						 lines=["Clk", "Data", "Q", "Qn"])
+	@property
+	def Data(self):
+		return self.reg.Data
+	@Data.setter
+	def Data(self, value):
+		self.reg.Data = value
+	
+	@property
+	def Clk(self):
+		return self.notGate.A
+	@Clk.setter
+	def Clk(self, value):
+		self.notGate.A = value
+
+	@property
+	def Q(self):
+		return self.reg.Q
+
+	@property
+	def Qn(self):
+		return self.reg.Qn
+
+	def process(self):
+		self.notGate.process()
+
+		self.reg.Clk = self.notGate.Q
+		self.reg.process()
+
+	def __repr__(self):
+		states = [self.Clk, self.Data, self.Q, self.Qn]
 		return self.buildTable(states)
 
 class ControlUnit(Part):
@@ -521,9 +600,8 @@ class ControlUnit(Part):
 		self.SkipLatch = DataLatch()
 
 		self.DataInRegister = DInRegister()
-		# self.DataInRegister = DFlipFlop()
 		self.DataOutRegister = DFlipFlop()
-		self.ResultRegister = DFlipFlop()
+		self.ResultRegister = ResultRegister()
 		self.InstrRegister = InstrRegister()
 
 		self.instrDecoder = InstrDecoder()
@@ -643,7 +721,7 @@ class ControlUnit(Part):
 		self.instrDecoder.I0 = self.InstrRegister.Q0
 		self.instrDecoder.process()
 
-		self.DataInRegister.IEN = self.instrDecoder.IEN
+		self.DataInRegister.Clk = self.instrDecoder.IEN
 		self.DataInRegister.process()
 
 		self.logicUnit.Data = self.DataInRegister.Q
