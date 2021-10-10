@@ -48,6 +48,28 @@ if __name__ == "__main__":
 		part.process()
 		part.printStates()
 
+	class Instructions(object):
+		def __init__(self):
+			(self.NOPO,
+			 self.LD,
+			 self.LDC,
+			 self.AND,
+			 self.ANDC,
+			 self.OR,
+			 self.ORC,
+			 self.XNOR,
+			 self.STO,
+			 self.STOC,
+			 self.IEN,
+			 self.OEN,
+			 self.JMP,
+			 self.RTN,
+			 self.SKZ,
+			 self.NOPF) = [i for i in range(0, 0x10)]
+			
+
+	instr = Instructions()
+
 	MC14K5.TestLU()
 	TestPart(MC14K5.Decoder())
 	TestPart(MC14K5.Mux())
@@ -57,17 +79,32 @@ if __name__ == "__main__":
 	# TestPart(MC14K5.ControlUnit())
 	control = MC14K5.ControlUnit()
 
-	print("Input Enable by setting data and giving the IEN instruction")
-	control.setInput(0, 1, *numToBits(4, 10))
-	clockMC14K5(control)
-	print("different instruction so that IEN will fall low and clock in data.")
-	control.setInput(0, 1, *numToBits(4, 0))
+	print("input enable.")
+	control.setInput(0, 1, *numToBits(4, instr.IEN))
 	clockMC14K5(control)
 
-	print("execute OR so that result of LU will be 1 and see if we can clock it into the RR register.")
-	control.setInput(0, 1, *numToBits(4, 5))
-	clockMC14K5(control)
-	print("another clock pulse to actually put it in the ResultRegister")
-	clockMC14K5(control)
+
+	# print("load 1 into result register")
+	# control.setInput(0, 1, *numToBits(4, 1))
+	# clockMC14K5(control)
+
+	# print("Input Enable by setting data and giving the IEN instruction")
+	# control.setInput(0, 1, *numToBits(4, 10))
+	# clockMC14K5(control)
+	# print("different instruction so that IEN will fall low and clock in data.")
 	# control.setInput(0, 1, *numToBits(4, 0))
+	# clockMC14K5(control)
+
+	# print("execute OR so that result of LU will be 1 and see if we can clock it into the RR register.")
+	# control.setInput(0, 1, *numToBits(4, 5))
+	# clockMC14K5(control)
+	# print("another clock pulse to actually put it in the ResultRegister")
+	# clockMC14K5(control)
+
+	# print("execute STO and see if RR->Q is on mux output.")
+	# control.setInput(0, 1, *numToBits(4, 8))
+	# clockMC14K5(control)
+
+	# print("execute STOC and see if Qn is on mux output.")
+	# control.setInput(0, 1, *numToBits(4, 9))
 	# clockMC14K5(control)

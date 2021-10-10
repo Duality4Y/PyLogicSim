@@ -469,11 +469,48 @@ class InstrRegister(Part):
 		states = [self.Clk, self.I3, self.I2, self.I1, self.I0, self.Q3, self.Q2, self.Q1, self.Q0]
 		return self.buildTable(states)
 
+class DInRegister(Part):
+	def __init__(self):
+		self.reg = DFlipFlop()
+		self.andGate = And()
+		self.notGate = Not()
+		super().__init__(numInputs=2, numOutputs=1,
+						 name="Data In Register",
+						 lines=["Data", "IEN", "Q"])
+	@property
+	def Data(self):
+		return self.reg.Data
+	@Data.setter
+	def Data(self, value):
+		self.reg.Data = value
+	
+	@property
+	def IEN(self):
+		return self.notGate.A
+	@IEN.setter
+	def IEN(self, value):
+		self.notGate.A = value
 
+	@property
+	def Q(self):
+		return self.andGate.Q
+
+	def process(self):
+		self.notGate.process()
+
+		self.reg.Clk = self.notGate.Q
+		self.reg.process()
+		
+		self.andGate.A = self.Data
+		self.andGate.B = self.reg.Q
+		self.andGate.process()
+
+	def __repr__(self):
+		states = [self.Data, self.IEN, self.Q]
+		return self.buildTable(states)
 
 class ControlUnit(Part):
 	def __init__(self):
-		self.andGate1 = And()
 		self.andGate2 = And()
 		self.notGate1 = Not()
 		
@@ -483,7 +520,8 @@ class ControlUnit(Part):
 		self.FlagFLatch = DataLatch()
 		self.SkipLatch = DataLatch()
 
-		self.DataInRegister = DFlipFlop()
+		self.DataInRegister = DInRegister()
+		# self.DataInRegister = DFlipFlop()
 		self.DataOutRegister = DFlipFlop()
 		self.ResultRegister = DFlipFlop()
 		self.InstrRegister = InstrRegister()
@@ -526,7 +564,6 @@ class ControlUnit(Part):
 	def Data(self, value):
 		self.DataInRegister.Data = value
 		self.DataOutRegister.Data = value
-		self.andGate1.A = value
 	@property
 	def I3(self):
 		return self.InstrRegister.I3
@@ -592,9 +629,9 @@ class ControlUnit(Part):
 		self.debugPrint(self.InstrRegister)
 		self.debugPrint(self.instrDecoder)
 		self.debugPrint(self.DataInRegister)
-		self.debugPrint(self.andGate1)
 		self.debugPrint(self.logicUnit)
 		self.debugPrint(self.ResultRegister)
+		self.debugPrint(self.mux)
 		print('\n' * 3)
 
 	def process(self):
@@ -606,13 +643,11 @@ class ControlUnit(Part):
 		self.instrDecoder.I0 = self.InstrRegister.Q0
 		self.instrDecoder.process()
 
-		self.DataInRegister.Clk = self.instrDecoder.IEN
+		self.DataInRegister.IEN = self.instrDecoder.IEN
 		self.DataInRegister.process()
 
-		self.andGate1.B = self.DataInRegister.Q
-		self.andGate1.process()
-
-		self.logicUnit.Data = self.andGate1.Q
+		self.logicUnit.Data = self.DataInRegister.Q
+		self.logicUnit.RIn = self.ResultRegister.Q
 		self.logicUnit.LD_OR = self.instrDecoder.LD | self.instrDecoder.OR
 		self.logicUnit.LDC_ORC = self.instrDecoder.LDC | self.instrDecoder.ORC
 		self.logicUnit.AND_XNOR = self.instrDecoder.AND | self.instrDecoder.XNOR
@@ -623,10 +658,15 @@ class ControlUnit(Part):
 
 		self.ResultRegister.Data = self.logicUnit.ROut
 		self.ResultRegister.process()
-		self.logicUnit.RIn = self.ResultRegister.Q
 
 		self.notGate1.A = self.ResultRegister.Qn
 		self.notGate1.process()
+
+		self.mux.A = self.ResultRegister.Q
+		self.mux.B = self.ResultRegister.Qn
+		self.mux.S0 = self.instrDecoder.STO
+		self.mux.S1 = self.instrDecoder.STOC
+		self.mux.process()
 		
 		# num = self.I0 | (self.I1 << 1) | (self.I2 << 2) | (self.I3 << 3)
 		# if num < 8:
