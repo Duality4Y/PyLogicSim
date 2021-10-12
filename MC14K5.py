@@ -514,7 +514,7 @@ class DOutRegister(Part):
 		self.reg = DFlipFlop()
 		self.notGate = Not()
 		super().__init__(numInputs=2, numOutputs=1,
-						 name="Data In Register",
+						 name="Data Out Register",
 						 lines=["Data", "CLK", "Q"])
 	@property
 	def Data(self):
@@ -545,7 +545,46 @@ class DOutRegister(Part):
 		self.reg.process()
 
 	def __repr__(self):
-		states = [self.Data, self.IEN, self.reg.Q, self.Q]
+		states = [self.Data, self.Clk, self.Q]
+		return self.buildTable(states)
+
+class FlagRegister(Part):
+	def __init__(self):
+		self.reg = DataLatch()
+		self.notGate = Not()
+		super().__init__(numInputs=2, numOutputs=1,
+						 name="Flag Register",
+						 lines=["Data", "CLK", "Q"])
+	@property
+	def Data(self):
+		return self.reg.Data
+	@Data.setter
+	def Data(self, value):
+		self.reg.Data = value
+	
+	@property
+	def Clk(self):
+		return self.notGate.A
+	@Clk.setter
+	def Clk(self, value):
+		self.notGate.A = value
+
+	@property
+	def Q(self):
+		return self.reg.Q
+
+	@property
+	def Qn(self):
+		return self.reg.Qn
+
+	def process(self):
+		self.notGate.process()
+
+		self.reg.Clk = self.notGate.Q
+		self.reg.process()
+
+	def __repr__(self):
+		states = [self.Data, self.Clk, self.Q]
 		return self.buildTable(states)
 
 class ResultRegister(Part):
@@ -554,7 +593,7 @@ class ResultRegister(Part):
 		self.andGate = And()
 		self.notGate = Not()
 		super().__init__(numInputs=2, numOutputs=1,
-						 name="Data In Register",
+						 name="ResultRegister",
 						 lines=["Clk", "Data", "Q", "Qn"])
 	@property
 	def Data(self):
@@ -590,17 +629,18 @@ class ResultRegister(Part):
 
 class ControlUnit(Part):
 	def __init__(self):
-		self.andGate2 = And()
+		self.andGate1 = And()
+		self.orGate1 = Or()
 		self.notGate1 = Not()
 		
-		self.JmpLatch = DataLatch()
-		self.RtnLatch = DataLatch()
-		self.FlagOLatch = DataLatch()
-		self.FlagFLatch = DataLatch()
-		self.SkipLatch = DataLatch()
+		self.JmpLatch = FlagRegister()
+		self.RtnLatch = FlagRegister()
+		self.FlagOLatch = FlagRegister()
+		self.FlagFLatch = FlagRegister()
+		self.SkipLatch = FlagRegister()
 
 		self.DataInRegister = DInRegister()
-		self.DataOutRegister = DFlipFlop()
+		self.DataOutRegister = DOutRegister()
 		self.ResultRegister = ResultRegister()
 		self.InstrRegister = InstrRegister()
 
@@ -629,7 +669,7 @@ class ControlUnit(Part):
 
 	@property
 	def Reset(self):
-		return self.JmpLatch.Q
+		return 1
 	@Reset.setter
 	def Reset(self, value):
 		for resetablePart in self.resetableParts:
@@ -669,7 +709,7 @@ class ControlUnit(Part):
 
 	@property
 	def Write(self):
-		return self.andGate2.Q
+		return self.andGate1.Q
 	@property
 	def RR(self):
 		return self.notGate1.Q
@@ -710,6 +750,10 @@ class ControlUnit(Part):
 		self.debugPrint(self.logicUnit)
 		self.debugPrint(self.ResultRegister)
 		self.debugPrint(self.mux)
+		self.debugPrint(self.DataOutRegister)
+		self.debugPrint(self.orGate1)
+		self.debugPrint(self.andGate1)
+		# self.debugPrint(self.FlagOLatch)
 		print('\n' * 3)
 
 	def process(self):
@@ -734,6 +778,17 @@ class ControlUnit(Part):
 		self.logicUnit.XNOR = self.instrDecoder.XNOR
 		self.logicUnit.process()
 
+		self.FlagOLatch.Data = self.instrDecoder.NOPO
+		self.FlagOLatch.process()
+		self.FlagFLatch.Data = self.instrDecoder.NOPF
+		self.FlagFLatch.process()
+		self.SkipLatch.Data = self.instrDecoder.SKZ
+		self.SkipLatch.process()
+		self.RtnLatch.Data = self.instrDecoder.RTN
+		self.RtnLatch.process()
+		self.JmpLatch.Data = self.instrDecoder.JMP
+		self.JmpLatch.process()
+
 		self.ResultRegister.Data = self.logicUnit.ROut
 		self.ResultRegister.process()
 
@@ -745,17 +800,18 @@ class ControlUnit(Part):
 		self.mux.S0 = self.instrDecoder.STO
 		self.mux.S1 = self.instrDecoder.STOC
 		self.mux.process()
-		
-		# num = self.I0 | (self.I1 << 1) | (self.I2 << 2) | (self.I3 << 3)
-		# if num < 8:
-		# 	print(self.andGate1.getLineTable())
-		# 	print(self.andGate1)
-		# 	print(self.InstrRegister.getLineTable())
-		# 	print(self.InstrRegister)
-		# 	print(self.instrDecoder.getLineTable())
-		# 	print(self.instrDecoder)
-		# 	print(self.logicUnit.getLineTable())
-		# 	print(self.logicUnit)
+
+		self.DataOutRegister.Data = self.mux.Q | self.Data
+		self.DataOutRegister.Clk = self.instrDecoder.OEN
+		self.DataOutRegister.process()
+
+		self.andGate1.A = self.DataOutRegister.Q
+		self.orGate1.A = self.instrDecoder.STO
+		self.orGate1.B = self.instrDecoder.STOC
+		self.orGate1.process()
+		self.andGate1.B = self.orGate1.Q
+		self.andGate1.process()
+
 
 	def __repr__(self):
 		states = [self.Clk, self.Data, self.I3, self.I2, self.I1, self.I0,
