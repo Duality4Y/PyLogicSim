@@ -1,5 +1,5 @@
-from Part import Part
-from Gates import Not, And, Or
+from basicparts.Part import Part
+from basicparts.Gates import Not, And, Or
 
 class Decoder(Part):
 	def __init__(self):

@@ -1,7 +1,18 @@
+def numToBits(length, number):
+	return [(number >> (length - i - 1)) & 0x01 for i in range(0, length)]
+
+def clockPart(part):
+	part.Clk = 1
+	part.process()
+	part.Clk = 0
+	part.process()
+
+	part.printStates()
+
 def getPulseShape(risingPulse):
 	return [0, 1, 0] if risingPulse else [1, 0, 1]
 
-def TestPart(part):
+def testPart(part):
 	print("Testing '{0}' part.".format(part.name))
 	print(part.getLineTable())
 	for i in range(0, 2 ** part.numInputs):
@@ -13,7 +24,7 @@ def TestPart(part):
 		print(part)
 	print()
 
-def ToggleClk(part, risingPulse=True):
+def toggleClk(part, risingPulse=True):
 	pulseShape = getPulseShape(risingPulse)
 	for clkstate in pulseShape:
 		if hasattr(part, "Clk"):
@@ -23,7 +34,7 @@ def ToggleClk(part, risingPulse=True):
 		part.process()
 		print(part)
 
-def TestFlipFlop(part):
+def testFlipFlop(part):
 	print("Testing '{0}' part.".format(part.name))
 	for i in range(0, 2 ** (part.numInputs)):
 		inValues = []
@@ -31,5 +42,5 @@ def TestFlipFlop(part):
 			inValues.insert(0, (i >> bitPos) & 0x01)
 		part.setInput(*inValues)
 		print(part.getLineTable())
-		ToggleClk(part)
+		toggleClk(part)
 	print()

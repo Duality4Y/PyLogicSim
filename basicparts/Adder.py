@@ -1,5 +1,5 @@
-from Part import Part
-from Gates import And, Xor, Or
+from basicparts.Part import Part
+from basicparts.Gates import And, Xor, Or
 
 class HalfAdder(Part):
 	def __init__(self):

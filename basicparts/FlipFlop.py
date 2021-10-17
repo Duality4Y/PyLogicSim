@@ -1,6 +1,6 @@
-from Part import Part
-from Gates import Not
-from Latch import GatedLatch
+from basicparts.Part import Part
+from basicparts.Gates import Not
+from basicparts.Latch import GatedLatch
 
 class FlipFlop(Part):
 	def __init__(self):

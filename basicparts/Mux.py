@@ -1,6 +1,6 @@
-from Part import Part
-from Gates import And, Or
-from Encoder import Decoder
+from basicparts.Part import Part
+from basicparts.Gates import And, Or
+from basicparts.Encoder import Decoder
 
 class Mux(Part):
 	def __init__(self):

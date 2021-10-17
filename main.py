@@ -1,53 +1,42 @@
-from Part import Part
-from Gates import And, Or, Not, Buffer, Nand, Nor, Xor, Xnor
-from Latch import SRLatch, GatedLatch, DataLatch
-from FlipFlop import FlipFlop, DFlipFlop, TFlipFlop
-from Adder import HalfAdder, FullAdder
+from basicparts.Part import Part
+from basicparts.Gates import And, Or, Not, Buffer, Nand, Nor, Xor, Xnor
+from basicparts.Latch import SRLatch, GatedLatch, DataLatch
+from basicparts.FlipFlop import FlipFlop, DFlipFlop, TFlipFlop
+from basicparts.Adder import HalfAdder, FullAdder
+from basicparts.Mux import Mux, DeMux, TestMux
+from basicparts.Encoder import Decoder
 
-from Mux import Mux, DeMux, TestMux
-from Encoder import Decoder
+from utils.TestUtils import testPart, testFlipFlop
+from utils.TestUtils import numToBits, clockPart
 
-from TestUtils import TestPart, TestFlipFlop
-
-import MC14K5
+from devices.MC14K5 import MC14K5
 
 if __name__ == "__main__":
 	print("Hello, world!")
 
-	TestPart(And())
-	TestPart(Or())
-	TestPart(Not())
-	TestPart(Buffer())
-	TestPart(Nand())
-	TestPart(Nor())
-	TestPart(Xor())
-	TestPart(Xnor())
+	testPart(And())
+	testPart(Or())
+	testPart(Not())
+	testPart(Buffer())
+	testPart(Nand())
+	testPart(Nor())
+	testPart(Xor())
+	testPart(Xnor())
 
-	TestPart(SRLatch())
-	TestPart(GatedLatch())
-	TestPart(DataLatch())
+	testPart(SRLatch())
+	testPart(GatedLatch())
+	testPart(DataLatch())
 
-	TestPart(HalfAdder())
-	TestPart(FullAdder())
+	testPart(HalfAdder())
+	testPart(FullAdder())
 
-	TestFlipFlop(FlipFlop())
-	TestFlipFlop(DFlipFlop())
-	TestFlipFlop(TFlipFlop())
+	testFlipFlop(FlipFlop())
+	testFlipFlop(DFlipFlop())
+	testFlipFlop(TFlipFlop())
 
-	TestPart(Decoder())
+	testPart(Decoder())
 	TestMux(Mux())
-	TestPart(DeMux())
-
-	def numToBits(length, number):
-		return [(number >> (length - i - 1)) & 0x01 for i in range(0, length)]
-
-	def clockMC14K5(part):
-		part.Clk = 1
-		part.process()
-		part.Clk = 0
-		part.process()
-
-		part.printStates()
+	testPart(DeMux())
 
 	class Instructions(object):
 		def __init__(self):
@@ -72,89 +61,88 @@ if __name__ == "__main__":
 	instr = Instructions()
 
 	MC14K5.TestLU()
-	TestPart(MC14K5.Decoder())
-	TestPart(MC14K5.Mux())
-	TestPart(MC14K5.InstrDecoder())
-	TestPart(MC14K5.InstrRegister())
-	TestFlipFlop(MC14K5.InstrRegister())
-	# TestPart(MC14K5.ControlUnit())
+	testPart(MC14K5.Decoder())
+	testPart(MC14K5.Mux())
+	testPart(MC14K5.InstrDecoder())
+	testPart(MC14K5.InstrRegister())
+	testFlipFlop(MC14K5.InstrRegister())
+	# testPart(MC14K5.ControlUnit())
 
 	control = MC14K5.ControlUnit()
 
 	print("-> input enable.")
 	control.setInput(0, 1, *numToBits(4, instr.IEN))
-	clockMC14K5(control)
+	clockPart(control)
 	print("-> LD(1) and STO(1) test.")
 	control.setInput(0, 1, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STO))
-	clockMC14K5(control)
+	clockPart(control)
 	print("-> LD(0) and STO(0) test.")
 	control.setInput(0, 0, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STO))
-	clockMC14K5(control)
+	clockPart(control)
 
 	print("-> LD(1) and STOC(1) test.")
 	control.setInput(0, 1, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 	print("-> LD(0) and STOC(0) test.")
 	control.setInput(0, 0, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 
 	print("-> output enable.")
 	control.setInput(0, 1, *numToBits(4, instr.OEN))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STO))
-	clockMC14K5(control)
+	clockPart(control)
 
 
 	print("-> write 1 through loading zero and storing the complement.")
 	control.setInput(0, 1, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 0, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 0, *numToBits(4, instr.OEN))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 0, *numToBits(4, instr.LD))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 0, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 0, *numToBits(4, instr.OEN))
-	clockMC14K5(control)
+	clockPart(control)
 	control.setInput(0, 0, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 0, *numToBits(4, instr.OEN))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 1, *numToBits(4, instr.OEN))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 1, *numToBits(4, instr.NOPO))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 1, *numToBits(4, instr.NOPF))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 1, *numToBits(4, instr.SKZ))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 1, *numToBits(4, instr.RTN))
-	clockMC14K5(control)
+	clockPart(control)
 	
 	control.setInput(0, 1, *numToBits(4, instr.JMP))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 0, *numToBits(4, instr.STO))
-	clockMC14K5(control)
+	clockPart(control)
 
 	control.setInput(0, 0, *numToBits(4, instr.STOC))
-	clockMC14K5(control)
+	clockPart(control)
 
-	

@@ -1,5 +1,5 @@
-from Part import Part
-from Gates import Nor, And, Not
+from basicparts.Part import Part
+from basicparts.Gates import Nor, And, Not
 
 class SRLatch(Part):
 	def __init__(self):

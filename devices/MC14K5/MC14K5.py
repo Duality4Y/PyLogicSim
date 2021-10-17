@@ -1,7 +1,7 @@
-from Part import Part
-from Gates import Not, And, Or, Nor, Buffer
-from FlipFlop import DFlipFlop
-from Latch import DataLatch
+from basicparts.Part import Part
+from basicparts.Gates import Not, And, Or, Nor, Buffer
+from basicparts.FlipFlop import DFlipFlop
+from basicparts.Latch import DataLatch
 
 class LogicUnit(Part):
 	def __init__(self):

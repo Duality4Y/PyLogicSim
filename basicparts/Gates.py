@@ -1,4 +1,4 @@
-from Part import Part
+from basicparts.Part import Part
 
 class And(Part):
 	def __init__(self):
