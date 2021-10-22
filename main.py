@@ -38,29 +38,10 @@ if __name__ == "__main__":
 	TestMux(Mux())
 	testPart(DeMux())
 
-	class Instructions(object):
-		def __init__(self):
-			(self.NOPO,
-			 self.LD,
-			 self.LDC,
-			 self.AND,
-			 self.ANDC,
-			 self.OR,
-			 self.ORC,
-			 self.XNOR,
-			 self.STO,
-			 self.STOC,
-			 self.IEN,
-			 self.OEN,
-			 self.JMP,
-			 self.RTN,
-			 self.SKZ,
-			 self.NOPF) = [i for i in range(0, 0x10)]
-			
-
-	instr = Instructions()
 
 	MC14K5.TestLU()
+
+
 	testPart(MC14K5.Decoder())
 	testPart(MC14K5.Mux())
 	testPart(MC14K5.InstrDecoder())
@@ -68,6 +49,7 @@ if __name__ == "__main__":
 	testFlipFlop(MC14K5.InstrRegister())
 	# testPart(MC14K5.ControlUnit())
 
+	instr = MC14K5.Instructions()
 	control = MC14K5.ControlUnit()
 
 	print("-> input enable.")
