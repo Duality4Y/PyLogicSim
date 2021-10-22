@@ -3,6 +3,25 @@ from basicparts.Gates import Not, And, Or, Nor, Buffer
 from basicparts.FlipFlop import DFlipFlop
 from basicparts.Latch import DataLatch
 
+class Instructions(object):
+	def __init__(self):
+		(self.NOPO,
+		 self.LD,
+		 self.LDC,
+		 self.AND,
+		 self.ANDC,
+		 self.OR,
+		 self.ORC,
+		 self.XNOR,
+		 self.STO,
+		 self.STOC,
+		 self.IEN,
+		 self.OEN,
+		 self.JMP,
+		 self.RTN,
+		 self.SKZ,
+		 self.NOPF) = [i for i in range(0, 0x10)]
+
 class LogicUnit(Part):
 	def __init__(self):
 		self.notData = Not()
