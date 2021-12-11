@@ -142,25 +142,6 @@ class Button(Widget):
 				self.border = 1
 			self.prevState = self.state
 
-		# x, y, width, height = self.rect
-		# mx, my = self.mpos
-
-		# if (mx > x and mx < (x + width)) and (my > y and my < (y + height)):
-		# 	self.border = 10
-		# 	if self.state > self.prevState:
-		# 		if self.pressedCallback:
-		# 			self.pressedCallback()
-		# 	elif self.state < self.prevState:
-		# 		if self.releasedCallback:
-		# 			self.releasedCallback()
-		# 	elif (self.state == self.prevState) and self.state == 1:
-		# 		pass
-		# 	elif (self.state == self.prevState) and self.state == 0:
-		# 		pass
-		# else:
-		# 	self.border = 1
-		# self.prevState = self.state
-
 class App(Widget):
 	def __init__(self):
 		self.Running = True
