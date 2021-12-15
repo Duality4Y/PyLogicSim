@@ -1,6 +1,7 @@
 import pygame
 import pygame.freetype
 import time
+import os
 pygame.init()
 
 screenSize = screenWidth, screenHeight = 800, 600
@@ -18,8 +19,18 @@ MAGENTA = (255, 0, 255)
 
 Running = True
 
+# UIFont = pygame.freetype.Font('resources/fonts/Roboto-Regular.ttf', 18)
+
+fontName = "Roboto-Regular.ttf"
+fontSize = 18
+cwd = os.getcwd()
+parentDir = os.path.join(cwd, "../")
+fontResourcePath = os.path.join(parentDir, "resources/fonts")
+fontPath = os.path.join(fontResourcePath, fontName)
+print(f"{__name__} : loading font: {fontPath}")
+
 pygame.font.init()
-UIFont = pygame.freetype.Font('resources/fonts/Roboto-Regular.ttf', 18)
+UIFont = pygame.freetype.Font(fontPath, fontSize)
 
 class Alignment(object):
 	def __init__(self):
@@ -47,6 +58,17 @@ class Alignment(object):
 		return (0, 0)
 Alignment = Alignment()
 
+"""
+	check if rect2 collides with rect1
+"""
+def CheckCollision(rect1, rect2):
+	x1, y1, width1, height1 = rect1
+	x2, y2, _, _ = rect2
+
+	if (x2 > x1 and x2 < (x1 + width1)) and (y2 > y1 and y2 < (y1 + height1)):
+		return True
+	return False
+
 # def EdgeDetector(object):
 # 	def __init__(self):
 # 		self.currState = 0
@@ -59,7 +81,6 @@ Alignment = Alignment()
 # 	def update(self, state):
 # 		self.currState = state
 # 		if self.currState > self.prevState:
-
 
 """ Basic Widget object that determines what other elements should look like"""
 class Widget(object):
@@ -76,7 +97,7 @@ class Widget(object):
 		pass
 
 class Label(Widget):
-	def __init__(self, text="", textAlignment=Alignment.right):
+	def __init__(self, text="", textAlignment=Alignment.right, borderVisible=True):
 		super().__init__()
 		self.text = text
 		self.textColor = GREEN
@@ -86,61 +107,140 @@ class Label(Widget):
 
 		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
 		self.textAlignment = textAlignment
+
+		self.borderVisible = borderVisible
+
+		self.defaultMargin = 8
+		self.margin = self.defaultMargin
 	
 	def draw(self, surface):
-		pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
-		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, 8)
+		""" Draw the text by apply a alignment function to its position. """
+		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, self.margin)
 		surface.blit(self.textSurface, (x, y))
+		""" Draw a border. """
+		if(self.borderVisible):
+			pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
 
-"""
-	check if rect2 collides with rect1
-"""
-def CheckCollision(rect1, rect2):
-	x1, y1, width1, height1 = rect1
-	x2, y2, _, _ = rect2
-
-	if (x2 > x1 and x2 < (x1 + width1)) and (y2 > y1 and y2 < (y1 + height1)):
-		return True
-	return False
-
-class Button(Widget):
+class Button(Label):
 	def __init__(self):
-		super().__init__()
-		self.borderColor = RED
-		self.border = 1
+		super().__init__("Button")
 		self.mpos = 0, 0
-		self.rect = (100, 150, 100, 100)
 
-		self.state = 0
-		self.prevState = 0
+		""" Custom label properties for a button. """
+		_, _, textWidth, textHeight = self.textRect
+		self.rect = (100, 150, textWidth + self.defaultMargin, textHeight + self.defaultMargin)
+		self.borderColor = RED
+		self.textAlignment = Alignment.center
+
+		self.clickState = 0
+		self.prevClickState = 0
 
 		self.onPressed = None
 		self.onReleased = None
 
-	def setState(self, state):
-		self.state = state
+		self.pressedCallback = None
+		self.releasedCallback = None
+
+	def setClickState(self, clickState):
+		self.clickState = clickState
+
+	def isPressed(self):
+		return (self.clickState > self.prevClickState)
+
+	def isReleased(self):
+		return (self.clickState < self.prevClickState)
 
 	def draw(self, surface):
-		pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
-	
+		super().draw(surface)
+
 	def handleEvents(self, event):
 		leftMouseBtn, _, _ = pygame.mouse.get_pressed()
-		self.setState(leftMouseBtn)
+		self.setClickState(leftMouseBtn)
 		if event.type == pygame.MOUSEMOTION:
 			self.mpos = event.pos
 
 	def processEvents(self):
 		colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
 		if colliding:
-			if self.state > self.prevState:
+			if self.isPressed():
 				if self.pressedCallback:
-					self.pressedCallback()
-				self.border = 10
-			if self.state < self.prevState:
-				if self.releasedCallback:
-					self.releasedCallback()
-				self.border = 1
-			self.prevState = self.state
+					self.pressedCallback(self)
+		""" 
+			Always check for a button release even outside of the button
+			because the mouse pointer can held down and moved outside of the button.
+		"""
+		if self.isReleased():
+			if self.releasedCallback:
+				self.releasedCallback(self)
+
+		self.prevClickState = self.clickState
+
+class ToggleButton(Button):
+	def __init__(self):
+		super().__init__()
+		self.toggleState = False
+		self.prevToggleState = False
+
+		self.toggleCallback = None
+		self.releasedCallback = self.OnReleased
+
+	def OnReleased(self, widget):
+		self.toggleState = not self.toggleState
+
+	def draw(self, surface):
+		super().draw(surface)
+
+	def handleEvents(self, event):
+		super().handleEvents(event)
+
+	def processEvents(self):
+		super().processEvents()
+		if self.prevToggleState != self.toggleState:
+			if self.toggleCallback:
+				self.toggleCallback(self)
+		self.prevToggleState = self.toggleState
+
+# class Button(Widget):
+# 	def __init__(self):
+# 		super().__init__()
+# 		self.borderColor = RED
+# 		self.border = 1
+# 		self.mpos = 0, 0
+# 		self.rect = (100, 150, 100, 100)
+
+# 		self.state = 0
+# 		self.prevState = 0
+
+# 		self.onPressed = None
+# 		self.onReleased = None
+
+# 		self.pressedCallback = None
+# 		self.releasedCallback = None
+
+# 	def setState(self, state):
+# 		self.state = state
+
+# 	def draw(self, surface):
+# 		pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
+	
+# 	def handleEvents(self, event):
+# 		leftMouseBtn, _, _ = pygame.mouse.get_pressed()
+# 		self.setState(leftMouseBtn)
+# 		if event.type == pygame.MOUSEMOTION:
+# 			self.mpos = event.pos
+
+# 	def processEvents(self):
+# 		colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
+# 		if colliding:
+# 			if self.state > self.prevState:
+# 				if self.pressedCallback:
+# 					self.pressedCallback()
+# 				self.border = 10
+# 			if self.state < self.prevState:
+# 				if self.releasedCallback:
+# 					self.releasedCallback()
+# 				self.border = 1
+# 			self.prevState = self.state
 
 class App(Widget):
 	def __init__(self):
@@ -167,8 +267,8 @@ class App(Widget):
 				""" Exit on hitting the window X. """
 				if event.type == pygame.QUIT:
 					self.Running = False
-			screen.fill(BLACK)
 			""" process and draw all the events."""
+			screen.fill(BLACK)
 			for widget in self.widgets:
 				widget.processEvents()
 				widget.draw(screen)
@@ -178,27 +278,39 @@ class App(Widget):
 class TestApp(App):
 	def __init__(self):
 		super().__init__()
-		button = Button()
-		button.pressedCallback = self.pressedCallback
-		button.releasedCallback = self.releasedCallback
+
+		# button = Button()
+		# button.pressedCallback = self.pressedCallback
+		# button.releasedCallback = self.releasedCallback
+		# self.addWidget(button)
+
+		button = ToggleButton()
+		button.toggleCallback = self.toggleCallback
 		self.addWidget(button)
 		
-		label = Label("Hello, World!")
-		self.addWidget(label)
+		# label = Label("Hello, World!")
+		# self.addWidget(label)
 
-		texts = 	 ["Left", "Center", "Right"]
-		alignments = [Alignment.left, Alignment.center, Alignment.right]
-		for i, (text, alignment) in enumerate(zip(texts, alignments)):
-			x = 50
-			y = 260 + (i * 60)
-			label = Label(text=text, textAlignment=alignment)
-			_, _, Lwidth, Lheight = label.rect
-			label.rect = x, y, Lwidth, Lheight
-			self.addWidget(label)
+		# texts = 	 ["Left", "Center", "Right"]
+		# alignments = [Alignment.left, Alignment.center, Alignment.right]
+		# for i, (text, alignment) in enumerate(zip(texts, alignments)):
+		# 	x = 50
+		# 	y = 260 + (i * 60)
+		# 	label = Label(text=text, textAlignment=alignment)
+		# 	_, _, Lwidth, Lheight = label.rect
+		# 	label.rect = x, y, Lwidth, Lheight
+		# 	self.addWidget(label)
 
+	def toggleCallback(self, widget):
+		if widget.toggleState:
+			widget.border = 2
+		else:
+			widget.border = 1
 
-	def pressedCallback(self):
-		print("pressed button.")
+	# def pressedCallback(self, widget):
+	# 	widget.border = 2
+	# 	print(f"pressed {widget}")
 
-	def releasedCallback(self):
-		print("released button.")
+	# def releasedCallback(self, widget):
+	# 	widget.border = 1
+	# 	print(f"released {widget}")
