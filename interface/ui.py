@@ -38,9 +38,9 @@ class Alignment(object):
 		 self.left,
 		 self.right) = [i for i in range(0, 3)]
 	"""
-		calculate rect2 alignment relative to rect1 with margin
+		calculate rect2 alignment relative to rect1 with padding
 	"""
-	def calcAlignment(self, rect1, rect2, alignment, margin):
+	def calcAlignment(self, rect1, rect2, alignment, padding):
 		lx, ly, lwidth, lheight = rect1
 		tx, ty, twidth, theight = rect2
 		if alignment == self.center:
@@ -48,11 +48,11 @@ class Alignment(object):
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y)
 		if alignment == self.left:
-			x = lx + margin
+			x = lx + padding
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y)
 		if alignment == self.right:
-			x = lx + (lwidth - twidth) - margin
+			x = lx + (lwidth - twidth) - padding
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y) 
 		return (0, 0)
@@ -100,26 +100,29 @@ class Label(Widget):
 	def __init__(self, text="", textAlignment=Alignment.right, borderVisible=True):
 		super().__init__()
 		self.text = text
-		self.textColor = GREEN
-		self.border = 1
+		# self.textColor = WHITE
+		self.textColor = tuple([0xff] * 3)
+		self.border = 2
 		self.borderColor = BLUE
-		self.rect = (50, 50, 150, 50)
+		self.rect = (0, 0, 0, 0)
 
 		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
 		self.textAlignment = textAlignment
 
 		self.borderVisible = borderVisible
 
-		self.defaultMargin = 8
-		self.margin = self.defaultMargin
+		self.defaultPadding = 8
+		self.padding = self.defaultPadding
 	
 	def draw(self, surface):
 		""" Draw the text by apply a alignment function to its position. """
-		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, self.margin)
+		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, self.padding)
 		surface.blit(self.textSurface, (x, y))
 		""" Draw a border. """
 		if(self.borderVisible):
-			pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
+			x, y, width, height = self.rect
+			smallest = min(width, height)
+			pygame.draw.rect(surface, self.borderColor, self.rect, self.border, round(smallest / 3))
 
 class Button(Label):
 	def __init__(self):
@@ -127,9 +130,10 @@ class Button(Label):
 		self.mpos = 0, 0
 
 		""" Custom label properties for a button. """
+		self.borderPadding = self.border * 2
 		_, _, textWidth, textHeight = self.textRect
-		self.rect = (100, 150, textWidth + self.defaultMargin, textHeight + self.defaultMargin)
-		self.borderColor = RED
+		self.rect = (50, 50, textWidth * 1.5 + self.defaultPadding + self.borderPadding, textHeight * 1.5 + self.defaultPadding + self.borderPadding)
+		self.borderColor = [169] * 3
 		self.textAlignment = Alignment.center
 
 		self.clickState = 0
@@ -182,12 +186,28 @@ class ToggleButton(Button):
 		self.prevToggleState = False
 
 		self.toggleCallback = None
-		self.releasedCallback = self.OnReleased
+		self.pressedCallback = self.OnPressed
 
-	def OnReleased(self, widget):
+		self.buttonSetColor = GREEN
+		self.buttonSetColor = [0, 0xff >> 1, 0]
+		"""
+			if highLightBorder has a value high then zero an highlight border that size is draw
+			if highLightBorder is zero then the rect is filled.
+		"""
+		# self.highLightBorder = self.border * 3
+		self.highLightBorder = 0
+
+	def OnPressed(self, widget):
 		self.toggleState = not self.toggleState
 
 	def draw(self, surface):
+		""" Draw a thicker border if the state is set for this button. """
+		if(self.toggleState):
+			if(self.borderVisible):
+				x, y, width, height = self.rect
+				smallest = min(width, height)
+				pygame.draw.rect(surface, self.buttonSetColor, self.rect, self.highLightBorder, round(smallest / 3))
+		""" Draw the normal border to indicate it's a button. """
 		super().draw(surface)
 
 	def handleEvents(self, event):
@@ -199,48 +219,6 @@ class ToggleButton(Button):
 			if self.toggleCallback:
 				self.toggleCallback(self)
 		self.prevToggleState = self.toggleState
-
-# class Button(Widget):
-# 	def __init__(self):
-# 		super().__init__()
-# 		self.borderColor = RED
-# 		self.border = 1
-# 		self.mpos = 0, 0
-# 		self.rect = (100, 150, 100, 100)
-
-# 		self.state = 0
-# 		self.prevState = 0
-
-# 		self.onPressed = None
-# 		self.onReleased = None
-
-# 		self.pressedCallback = None
-# 		self.releasedCallback = None
-
-# 	def setState(self, state):
-# 		self.state = state
-
-# 	def draw(self, surface):
-# 		pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
-	
-# 	def handleEvents(self, event):
-# 		leftMouseBtn, _, _ = pygame.mouse.get_pressed()
-# 		self.setState(leftMouseBtn)
-# 		if event.type == pygame.MOUSEMOTION:
-# 			self.mpos = event.pos
-
-# 	def processEvents(self):
-# 		colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
-# 		if colliding:
-# 			if self.state > self.prevState:
-# 				if self.pressedCallback:
-# 					self.pressedCallback()
-# 				self.border = 10
-# 			if self.state < self.prevState:
-# 				if self.releasedCallback:
-# 					self.releasedCallback()
-# 				self.border = 1
-# 			self.prevState = self.state
 
 class App(Widget):
 	def __init__(self):
@@ -302,10 +280,7 @@ class TestApp(App):
 		# 	self.addWidget(label)
 
 	def toggleCallback(self, widget):
-		if widget.toggleState:
-			widget.border = 2
-		else:
-			widget.border = 1
+		print(f"toggleState: {widget.toggleState}")
 
 	# def pressedCallback(self, widget):
 	# 	widget.border = 2
