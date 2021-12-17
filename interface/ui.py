@@ -211,14 +211,13 @@ class CheckButton(Button):
 			if highLightBorder has a value high then zero an highlight border that size is draw
 			if highLightBorder is zero then the rect is filled.
 		"""
-		# self.highLightBorder = self.border * 3
 		self.highLightBorder = 0
 
 	def OnPressed(self, widget):
 		self.marked = not self.marked
 
 	def draw(self, surface):
-		""" Draw a thicker border if the state is set for this button. """
+		""" fill in the button if button is set. """
 		if(self.marked):
 			if(self.borderVisible):
 				x, y, width, height = self.rect
@@ -236,6 +235,12 @@ class CheckButton(Button):
 			if self.checkCallback:
 				self.checkCallback(self)
 		self.prevMarked = self.marked
+
+class Pane(Widget):
+	pass
+
+class Grid(Widget):
+	pass
 
 class App(Widget):
 	def __init__(self):
