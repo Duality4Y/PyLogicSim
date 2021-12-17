@@ -5,10 +5,6 @@ import time
 import os
 import sys
 
-if __name__ == "__main__":
-	print("Do not execute this file.")
-	exit(0)
-
 pygame.init()
 pygame.font.init()
 
@@ -16,6 +12,7 @@ moduleFilePath = os.path.abspath(sys.modules['__main__'].__file__)
 projectRoot = os.path.dirname(moduleFilePath)
 
 screenSize = screenWidth, screenHeight = 800, 600
+screen = pygame.display.set_mode(screenSize)
 
 BLACK = (0, 0, 0)
 GRAY = (127, 127, 127)
@@ -37,7 +34,6 @@ fontPath = os.path.join(fontResourcePath, fontName)
 print(f"{__name__} : loading font: {fontPath}")
 UIFont = pygame.freetype.Font(fontPath, fontSize)
 
-screen = pygame.display.set_mode(screenSize)
 
 class Alignment(object):
 	def __init__(self):
@@ -104,32 +100,39 @@ class Widget(object):
 		pass
 
 class Label(Widget):
-	def __init__(self, text="", textAlignment=Alignment.right, borderVisible=True):
+	def __init__(self, text="", textAlignment=Alignment.center, borderVisible=True):
 		super().__init__()
 		self.text = text
 		# self.textColor = WHITE
 		self.textColor = tuple([0xff] * 3)
 		self.border = 2
 		self.borderColor = BLUE
-		self.rect = (0, 0, 0, 0)
-
-		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
-		self.textAlignment = textAlignment
 
 		self.borderVisible = borderVisible
 
+		# how much room between edge and text (padding between text and label border)
 		self.defaultPadding = 8
 		self.padding = self.defaultPadding
-	
-	def draw(self, surface):
-		""" Draw the text by apply a alignment function to its position. """
-		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, self.padding)
-		surface.blit(self.textSurface, (x, y))
-		""" Draw a border. """
+
+		self.textAlignment = textAlignment
+		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
+		_, _, textWidth, textHeight = self.textRect
+		self.rect = (0, 0, textWidth * 1.5 + self.defaultPadding, textHeight * 1.5 + self.defaultPadding)
+		# self.rect = (0, 0, 0, 0)
+
+	def drawBorder(self, surface):
+		""" Draw a border rectangular. """
 		if(self.borderVisible):
 			x, y, width, height = self.rect
 			smallest = min(width, height)
-			pygame.draw.rect(surface, self.borderColor, self.rect, self.border, round(smallest / 3))
+			pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
+	
+	def draw(self, surface):
+		""" Draw the text after applying a alignment function to its position. """
+		x, y = Alignment.calcAlignment(self.rect, self.textRect, self.textAlignment, self.padding)
+		surface.blit(self.textSurface, (x, y))
+		""" draw a border """
+		self.drawBorder(surface)
 
 class Button(Label):
 	def __init__(self):
@@ -161,6 +164,13 @@ class Button(Label):
 	def isReleased(self):
 		return (self.clickState < self.prevClickState)
 
+	def drawBorder(self, surface):
+		""" Draw a border rectangular. """
+		if(self.borderVisible):
+			x, y, width, height = self.rect
+			smallest = min(width, height)
+			pygame.draw.rect(surface, self.borderColor, self.rect, self.border, round(smallest / 3))
+
 	def draw(self, surface):
 		super().draw(surface)
 
@@ -186,13 +196,13 @@ class Button(Label):
 
 		self.prevClickState = self.clickState
 
-class ToggleButton(Button):
+class CheckButton(Button):
 	def __init__(self):
 		super().__init__()
-		self.toggleState = False
-		self.prevToggleState = False
+		self.marked = False
+		self.prevMarked = False
 
-		self.toggleCallback = None
+		self.checkCallback = None
 		self.pressedCallback = self.OnPressed
 
 		self.buttonSetColor = GREEN
@@ -205,11 +215,11 @@ class ToggleButton(Button):
 		self.highLightBorder = 0
 
 	def OnPressed(self, widget):
-		self.toggleState = not self.toggleState
+		self.marked = not self.marked
 
 	def draw(self, surface):
 		""" Draw a thicker border if the state is set for this button. """
-		if(self.toggleState):
+		if(self.marked):
 			if(self.borderVisible):
 				x, y, width, height = self.rect
 				smallest = min(width, height)
@@ -222,10 +232,10 @@ class ToggleButton(Button):
 
 	def processEvents(self):
 		super().processEvents()
-		if self.prevToggleState != self.toggleState:
-			if self.toggleCallback:
-				self.toggleCallback(self)
-		self.prevToggleState = self.toggleState
+		if self.prevMarked != self.marked:
+			if self.checkCallback:
+				self.checkCallback(self)
+		self.prevMarked = self.marked
 
 class App(Widget):
 	def __init__(self):
@@ -264,35 +274,34 @@ class TestApp(App):
 	def __init__(self):
 		super().__init__()
 
-		# button = Button()
-		# button.pressedCallback = self.pressedCallback
-		# button.releasedCallback = self.releasedCallback
-		# self.addWidget(button)
+		button = Button()
+		button.pressedCallback = self.pressedCallback
+		button.releasedCallback = self.releasedCallback
+		self.addWidget(button)
 
-		button = ToggleButton()
-		button.toggleCallback = self.toggleCallback
+		button = CheckButton()
+		button.checkCallback = self.checkCallback
 		self.addWidget(button)
 		
-		# label = Label("Hello, World!")
-		# self.addWidget(label)
+		label = Label("Hello, World!")
+		self.addWidget(label)
 
-		# texts = 	 ["Left", "Center", "Right"]
-		# alignments = [Alignment.left, Alignment.center, Alignment.right]
-		# for i, (text, alignment) in enumerate(zip(texts, alignments)):
-		# 	x = 50
-		# 	y = 260 + (i * 60)
-		# 	label = Label(text=text, textAlignment=alignment)
-		# 	_, _, Lwidth, Lheight = label.rect
-		# 	label.rect = x, y, Lwidth, Lheight
-		# 	self.addWidget(label)
+		texts = 	 ["Left", "Center", "Right"]
+		alignments = [Alignment.left, Alignment.center, Alignment.right]
+		for i, (text, alignment) in enumerate(zip(texts, alignments)):
+			x = 50
+			y = 260 + (i * 60)
+			label = Label(text=text, textAlignment=alignment)
+			_, _, Lwidth, Lheight = label.rect
+			# multiply label width by 2 to exaggerate allignment
+			label.rect = x, y, Lwidth * 2, Lheight
+			self.addWidget(label)
 
-	def toggleCallback(self, widget):
-		print(f"toggleState: {widget.toggleState}")
+	def checkCallback(self, widget):
+		print(f"checkState: {widget.marked}")
 
-	# def pressedCallback(self, widget):
-	# 	widget.border = 2
-	# 	print(f"pressed {widget}")
+	def pressedCallback(self, widget):
+		print(f"pressed {widget}")
 
-	# def releasedCallback(self, widget):
-	# 	widget.border = 1
-	# 	print(f"released {widget}")
+	def releasedCallback(self, widget):
+		print(f"released {widget}")
