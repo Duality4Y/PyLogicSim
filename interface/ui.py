@@ -1,11 +1,21 @@
 import pygame
 import pygame.freetype
 import time
+
 import os
+import sys
+
+if __name__ == "__main__":
+	print("Do not execute this file.")
+	exit(0)
+
 pygame.init()
+pygame.font.init()
+
+moduleFilePath = os.path.abspath(sys.modules['__main__'].__file__)
+projectRoot = os.path.dirname(moduleFilePath)
 
 screenSize = screenWidth, screenHeight = 800, 600
-screen = pygame.display.set_mode(screenSize)
 
 BLACK = (0, 0, 0)
 GRAY = (127, 127, 127)
@@ -19,18 +29,15 @@ MAGENTA = (255, 0, 255)
 
 Running = True
 
-# UIFont = pygame.freetype.Font('resources/fonts/Roboto-Regular.ttf', 18)
-
 fontName = "Roboto-Regular.ttf"
 fontSize = 18
-cwd = os.getcwd()
-parentDir = os.path.join(cwd, "../")
-fontResourcePath = os.path.join(parentDir, "resources/fonts")
+
+fontResourcePath = os.path.join(projectRoot, "resources/fonts")
 fontPath = os.path.join(fontResourcePath, fontName)
 print(f"{__name__} : loading font: {fontPath}")
-
-pygame.font.init()
 UIFont = pygame.freetype.Font(fontPath, fontSize)
+
+screen = pygame.display.set_mode(screenSize)
 
 class Alignment(object):
 	def __init__(self):
