@@ -88,6 +88,19 @@ def CheckCollision(rect1, rect2):
 """ Basic Widget object that determines what other elements should look like"""
 class Widget(object):
 	def __init__(self):
+		self.offset = (0, 0)
+		self.rect = (0, 0, 0, 0)
+
+	def setOffset(self, offset):
+		self.offset = offset
+
+	def applyOffset(self, rect):
+		xo, yo = self.offset
+		x, y, width, height = rect
+		return (x + xo, y + yo, width, height)
+
+	""" This functions allows for the drawing of a border """
+	def drawBorder(self, surface):
 		pass
 	""" This function draws the widget """
 	def draw(self, surface):
@@ -98,6 +111,60 @@ class Widget(object):
 	""" process previously set state to generate events and call calbacks if needed."""
 	def processEvents(self):
 		pass
+
+class Pane(Widget):
+	def __init__(self, rect):
+		super().__init__()
+
+		self.rect = rect
+
+		self.borderVisible = True
+
+		self.borderColor = GREEN
+		self.border = 1
+		self.borderWidth = 1
+
+		self.widgets = []
+
+	def addWidget(self, widget):
+		self.widgets.append(widget)
+		self.updateWidgets()
+
+	def updateWidgets(self):
+		for widget in self.widgets:
+			x, y, _, _ = self.rect
+			widget.setOffset((x, y))
+
+	def drawBorder(self, surface):
+		if self.borderVisible:
+			x, y, width, height = self.rect
+			rect = x, y, width, height
+			# outer border is easy to draw it is just the bounding rectangle.
+			pygame.draw.rect(surface, self.borderColor, rect, self.border)
+			# calculate inner border and draw it
+			inner = x + self.borderWidth + self.border * 2, \
+					y + self.borderWidth + self.border * 2, \
+					width - (self.borderWidth + self.border * 2) * 2, \
+					height - (self.borderWidth + self.border * 2) * 2
+			pygame.draw.rect(surface, self.borderColor, inner, self.border, border_radius=10)
+
+	def draw(self, surface):
+		self.drawBorder(surface)
+		# for now set an offset to all the widgets relative to the pane and draw them
+		for widget in self.widgets:
+			widget.draw(surface)
+
+	def handleEvents(self, event):
+		super().handleEvents(event)
+		for widget in self.widgets:
+			widget.handleEvents(event)
+
+	def processEvents(self):
+		super().processEvents()
+		for widget in self.widgets:
+			widget.processEvents()
+
+
 
 class Label(Widget):
 	def __init__(self, text="", textAlignment=Alignment.center, borderVisible=True):
@@ -118,13 +185,10 @@ class Label(Widget):
 		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
 		_, _, textWidth, textHeight = self.textRect
 		self.rect = (0, 0, textWidth * 1.5 + self.defaultPadding, textHeight * 1.5 + self.defaultPadding)
-		# self.rect = (0, 0, 0, 0)
 
 	def drawBorder(self, surface):
 		""" Draw a border rectangular. """
 		if(self.borderVisible):
-			x, y, width, height = self.rect
-			smallest = min(width, height)
 			pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
 	
 	def draw(self, surface):
@@ -181,7 +245,7 @@ class Button(Label):
 			self.mpos = event.pos
 
 	def processEvents(self):
-		colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
+		colliding = CheckCollision(self.applyOffset(self.rect), (*self.mpos, 0, 0))
 		if colliding:
 			if self.isPressed():
 				if self.pressedCallback:
@@ -220,9 +284,9 @@ class CheckButton(Button):
 		""" fill in the button if button is set. """
 		if(self.marked):
 			if(self.borderVisible):
-				x, y, width, height = self.rect
+				_, _, width, height = self.rect
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.buttonSetColor, self.rect, self.highLightBorder, round(smallest / 3))
+				pygame.draw.rect(surface, self.buttonSetColor, self.applyOffset(self.rect), self.highLightBorder, round(smallest / 3))
 		""" Draw the normal border to indicate it's a button. """
 		super().draw(surface)
 
@@ -235,9 +299,6 @@ class CheckButton(Button):
 			if self.checkCallback:
 				self.checkCallback(self)
 		self.prevMarked = self.marked
-
-class Pane(Widget):
-	pass
 
 class Grid(Widget):
 	pass
@@ -279,28 +340,32 @@ class TestApp(App):
 	def __init__(self):
 		super().__init__()
 
-		button = Button()
-		button.pressedCallback = self.pressedCallback
-		button.releasedCallback = self.releasedCallback
-		self.addWidget(button)
+		# button = Button()
+		# button.pressedCallback = self.pressedCallback
+		# button.releasedCallback = self.releasedCallback
+		# self.addWidget(button)
 
 		button = CheckButton()
 		button.checkCallback = self.checkCallback
-		self.addWidget(button)
+		# self.addWidget(button)
 		
-		label = Label("Hello, World!")
-		self.addWidget(label)
+		# label = Label("Hello, World!")
+		# self.addWidget(label)
 
-		texts = 	 ["Left", "Center", "Right"]
-		alignments = [Alignment.left, Alignment.center, Alignment.right]
-		for i, (text, alignment) in enumerate(zip(texts, alignments)):
-			x = 50
-			y = 260 + (i * 60)
-			label = Label(text=text, textAlignment=alignment)
-			_, _, Lwidth, Lheight = label.rect
-			# multiply label width by 2 to exaggerate allignment
-			label.rect = x, y, Lwidth * 2, Lheight
-			self.addWidget(label)
+		# texts = 	 ["Left", "Center", "Right"]
+		# alignments = [Alignment.left, Alignment.center, Alignment.right]
+		# for i, (text, alignment) in enumerate(zip(texts, alignments)):
+		# 	x = 50
+		# 	y = 260 + (i * 60)
+		# 	label = Label(text=text, textAlignment=alignment)
+		# 	_, _, Lwidth, Lheight = label.rect
+		# 	# multiply label width by 2 to exaggerate allignment
+		# 	label.rect = x, y, Lwidth * 2, Lheight
+		# 	self.addWidget(label)
+
+		pane = Pane((0, screenHeight / 2, screenWidth, screenHeight / 2))
+		pane.addWidget(button)
+		self.addWidget(pane)
 
 	def checkCallback(self, widget):
 		print(f"checkState: {widget.marked}")
