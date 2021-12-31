@@ -91,11 +91,11 @@ def CheckCollision(rect1, rect2):
 class Widget(object):
 	def __init__(self, *args, **kwargs):
 		self.offset = (0, 0)
-		self.rect = (0, 0, 100, 100)
+		self.rect = kwargs.get("rect", (0, 0, 100, 100))
 
 		self.parent = None
 
-		self.id = None
+		self.id = kwargs.get("id")
 
 	def setParent(self, parent):
 		self.parent = parent
@@ -131,18 +131,9 @@ class Widget(object):
 	def processEvents(self):
 		pass
 
-class Pane(Widget):
+class Container(Widget):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-
-		self.rect = kwargs.get('rect')
-
-		self.borderVisible = True
-
-		self.borderColor = GREEN
-		self.border = 1
-		self.borderWidth = 1
-
 		self.widgets = []
 
 	def addWidget(self, widget):
@@ -151,9 +142,20 @@ class Pane(Widget):
 		self.updateWidgets()
 
 	def updateWidgets(self):
+		""" update widget offset relative to the container """
 		for widget in self.widgets:
 			x, y, _, _ = self.rect
 			widget.setOffset((x, y))
+
+class Pane(Container):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.borderVisible = True
+
+		self.borderColor = GREEN
+		self.border = 1
+		self.borderWidth = 1
 
 	def drawBorder(self, surface):
 		if self.borderVisible:

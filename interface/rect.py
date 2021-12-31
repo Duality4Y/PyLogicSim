@@ -1,6 +1,21 @@
+import collections
+
 class Rect(object):
 	def __init__(self, *args):
-		self.rectValues = list(args)
+		print(f"args: {args}")
+		print(f"args[0]: {args[0]}")
+		if isinstance(args, collections.Sequence):
+			if isinstance(args[0], collections.Sequence):
+				self.rectValues = list(args[0])
+			else:
+				self.rectValues = args
+		# if isinstance(args, collections.Sequence):
+		# 	print(f"Sequence: {args}")
+		# 	self.rectValues = args[0]
+		# else:
+		# 	print(f"Non sequence: {args}")
+		# 	self.rectValues = args
+		print(f"self.rectValues = {self.rectValues}")
 
 	@property
 	def x(self):
