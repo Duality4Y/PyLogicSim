@@ -38,25 +38,26 @@ UIFont = pygame.freetype.Font(fontPath, fontSize)
 DebugDraw = True
 
 class Alignment(object):
+	(CENTER,
+	 LEFT,
+	 RIGHT) = [i for i in range(0, 3)]
 	def __init__(self):
-		(self.center,
-		 self.left,
-		 self.right) = [i for i in range(0, 3)]
+		pass
 	"""
 		calculate rect2 alignment relative to rect1 with padding
 	"""
 	def apply(self, rect1, rect2, alignment, padding):
 		lx, ly, lwidth, lheight = rect1
 		tx, ty, twidth, theight = rect2
-		if alignment == self.center:
+		if alignment == Alignment.CENTER:
 			x = int(lx + (lwidth - twidth) / 2)
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y)
-		if alignment == self.left:
+		if alignment == Alignment.LEFT:
 			x = lx + padding
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y)
-		if alignment == self.right:
+		if alignment == Alignment.RIGHT:
 			x = lx + (lwidth - twidth) - padding
 			y = int(ly + (lheight - theight) / 2)
 			return (x, y) 
@@ -111,10 +112,12 @@ class Widget(object):
 
 		self.id = kwargs.get("id")
 
+		self.borderColor = (0, 0, 0xff)
+		self.crossColor1 = (0xff, 0, 0)
+		self.crossColor2 = (0, 0xff, 0)
+
 	def setParent(self, parent):
 		self.parent = parent
-		# print(f"I am a {type(self).__name__}")
-		# print(f"And my parent is a {type(self.parent).__name__}")
 
 	def setOffset(self, offset):
 		self.offset = offset
@@ -129,7 +132,7 @@ class Widget(object):
 
 	""" This functions allows for the drawing of a border """
 	def drawBorder(self, surface):
-		pygame.draw.rect(surface, (0, 0, 0xff), self.applyOffset(self.rect), 1)
+		pygame.draw.rect(surface, self.borderColor, self.applyOffset(self.rect), 1)
 	""" This function draws the widget """
 	def draw(self, surface):
 		if DebugDraw == False:
@@ -138,8 +141,8 @@ class Widget(object):
 		self.drawBorder(surface)
 		""" a cross to make clear where the corners are and where the middle is in relation to other things. """
 		x, y, width, height = self.applyOffset(self.rect)
-		pygame.draw.line(surface, (0xff, 0, 0), (x, y), (x + width, y + height), 1)
-		pygame.draw.line(surface, (0, 0xff, 0), (x, y + height), (x + width, y), 1)
+		pygame.draw.line(surface, self.crossColor1, (x, y), (x + width, y + height), 1)
+		pygame.draw.line(surface, self.crossColor2, (x, y + height), (x + width, y), 1)
 	""" this function sets the internal state based on outside events."""
 	def handleEvents(self, event):
 		pass
@@ -163,7 +166,7 @@ class Label(Widget):
 		self.defaultPadding = 8
 		self.padding = self.defaultPadding
 
-		self.textAlignment = kwargs.get('textAlignment', Alignment.center)
+		self.textAlignment = kwargs.get('textAlignment', Alignment.CENTER)
 		self.textSurface, self.textRect = UIFont.render(self.text, self.textColor)
 		_, _, textWidth, textHeight = self.textRect
 		self.rect = (0, 0, textWidth * 1.5 + self.defaultPadding, textHeight * 1.5 + self.defaultPadding)
@@ -190,7 +193,7 @@ class Button(Label):
 		_, _, textWidth, textHeight = self.textRect
 		self.rect = (50, 50, textWidth * 1.5 + self.defaultPadding + self.borderPadding + 200, textHeight * 1.5 + self.defaultPadding + self.borderPadding)
 		self.borderColor = [169] * 3
-		self.textAlignment = Alignment.right
+		self.textAlignment = Alignment.RIGHT
 
 		self.clickState = 0
 		self.prevClickState = 0
@@ -229,15 +232,19 @@ class Button(Label):
 		if(self.borderVisible):
 			x, y, width, height = self.rect
 			smallest = min(width, height)
-			pygame.draw.rect(surface, self.borderColor, self.applyOffset(self.rect), self.border, round(smallest / 3))
+			marginSize = 10
+			marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
+			pygame.draw.rect(surface, self.borderColor, self.applyOffset(marginRect), self.border, round(smallest / 3))
 
 	def draw(self, surface):
 		""" Draw a highlight when held down. """
 		if self.isHeld:
 			if(self.borderVisible):
-				_, _, width, height = self.rect
+				x, y, width, height = self.rect
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.highLightColor, self.applyOffset(self.rect), self.highLightBorder, round(smallest / 3))
+				marginSize = 10
+				marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
+				pygame.draw.rect(surface, self.highLightColor, self.applyOffset(marginRect), self.highLightBorder, round(smallest / 3))
 
 		super().draw(surface)
 
@@ -323,11 +330,14 @@ class Container(Widget):
 		self.widgets.append(widget)
 
 	def update(self):
-		# print(f"updating widgets {type(self).__name__}")
-		""" update widget offset relative to the container """
+		super().update()
+		""" update widget offset relative to the parent """
 		for widget in self.widgets:
 			x, y, _, _ = self.rect
 			widget.setOffset((x, y))
+		""" call all update functions for the widgets in this container. """
+		for widget in self.widgets:
+			widget.update()
 
 	""" Draw all the widgets in the Container. """
 	def draw(self, surface):
@@ -387,23 +397,51 @@ class Grid(Widget):
 				widget.draw(surface)
 
 class Box(Container):
-	HORIZONTAL = 0
-	VERTICAL = 1
-	
+	(HORIZONTAL,
+	 VERTICAL) = [i for i in range(0, 2)]
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.orientation = kwargs.get('ori', Box.HORIZONTAL)
+		self.boxType = kwargs.get('type', Box.HORIZONTAL)
+
+	def updateHorizonal(self):
+		numWidgets = len(self.widgets)
+		x, y, width, height = self.rect
+		sectionSize = int(width / numWidgets)
+		
+		for i, widget in enumerate(self.widgets):
+			widgetX, widgetY, widgetWidth, widgetHeight = widget.rect
+			widget.rect = x + i * sectionSize, y, sectionSize, height
+
+	def updateVertical(self):
+		numWidgets = len(self.widgets)
+		x, y, width, height = self.rect
+		sectionSize = int(height / numWidgets)
+		
+		for i, widget in enumerate(self.widgets):
+			widgetX, widgetY, widgetWidth, widgetHeight = widget.rect
+			widget.rect = x, y + i * sectionSize, width, sectionSize
+
+	def setPosition(self, rect):
+		pass
+
+	def setSize(self, rect):
+		x, y, width, height = self.rect
+		rx, ry, rwidth, rheight = rect
+		self.rect = x, y, rwidth, rheight
 
 	def update(self):
 		super().update()
-		""" Expand our selves into the parent. """
-		self.rect = self.parent.rect
-		""" update widget size and positions. """
-		numWidgets = len(self.widgets)
-		x, y, width, height = self.rect
-		for widget in self.widgets:
-			widget.rect = self.rect
 
+		if not len(self.widgets):
+			return
+
+		""" update widget size and positions. """
+		if self.boxType == Box.HORIZONTAL:
+			self.updateHorizonal()
+		elif self.boxType == Box.VERTICAL:
+			self.updateVertical()
+
+		super().update()
 
 class App(Container):
 	def __init__(self, *args, **kwargs):
@@ -411,14 +449,16 @@ class App(Container):
 		self.Running = True
 		self.rect = kwargs.get('rect', (0, 0, *screenSize))
 
+		self.setParent(self) # is this a good idea? this thing is supposed to be the top level
+
+	def update(self):
+		for widget in self.widgets:
+			widget.setSize(self.rect)
+		super().update()
+
 	def quitApplication(self):
 		pygame.quit()
 		quit()
-
-	def update(self):
-		super().update()
-		for widget in self.widgets:
-			widget.update()
 
 	def run(self):
 		""" update widgets once. """
@@ -488,10 +528,27 @@ class TestApp(App):
 		# button.pressedCallback = self.pressedCallback
 		# self.addWidget(button)
 
-		box = Box()
-		box.addWidget(Button(text="Box Button"))
+		box = Box(type=Box.VERTICAL)
+		box2 = Box(type=Box.HORIZONTAL)
+		box2.borderColor = (0xff, 0, 0)
+		
+		box.addWidget(Widget())
+		box.addWidget(Pane())
+		box.addWidget(box2)
+		box.addWidget(Button())
+		box.addWidget(Button())
+		box.addWidget(Button())
+
+		box2.id = 42
+		box2.addWidget(Pane())
+		box2.addWidget(Button())
+		# box2.addWidget(Pane())
+		# box2.addWidget(Widget())
+
+		# box2.addWidget(Widget())
+		# box2.addWidget(Widget())
+
 		self.addWidget(box)
-		self.addWidget(Button(text="Window Button"))
 
 	def checkCallback(self, widget):
 		if(widget.marked):
