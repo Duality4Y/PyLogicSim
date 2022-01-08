@@ -1,3 +1,5 @@
+import pygame
+
 from interface.window import UIFont
 from interface.widget import Widget
 from interface.alignment import Alignment

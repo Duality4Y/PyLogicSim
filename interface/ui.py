@@ -9,6 +9,8 @@ from interface.button import CheckButton
 from interface.button import Button
 from interface.container import Box
 from interface.container import Pane
+from interface.container import Grid
+from interface.container import Container
 from interface.alignment import Alignment
 
 # def EdgeDetector(object):
