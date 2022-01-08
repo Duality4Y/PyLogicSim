@@ -30,11 +30,11 @@ class Label(Widget):
 	def drawBorder(self, surface):
 		""" Draw a border rectangular. """
 		if(self.borderVisible):
-			pygame.draw.rect(surface, self.borderColor, self.applyOffset(self.rect), self.border)
+			pygame.draw.rect(surface, self.borderColor, self.rect, self.border)
 	
 	def draw(self, surface):
 		""" Draw the text after applying a alignment function to its position. """
-		x, y = Alignment.apply(self.applyOffset(self.rect), self.textRect, self.textAlignment, self.padding)
+		x, y = Alignment.apply(self.rect, self.textRect, self.textAlignment, self.padding)
 		surface.blit(self.textSurface, (x, y))
 		""" draw a border """
 		self.drawBorder(surface)

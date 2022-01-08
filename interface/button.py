@@ -16,7 +16,7 @@ class Button(Label):
 		_, _, textWidth, textHeight = self.textRect
 		self.rect = (50, 50, textWidth * 1.5 + self.defaultPadding + self.borderPadding + 200, textHeight * 1.5 + self.defaultPadding + self.borderPadding)
 		self.borderColor = [169] * 3
-		self.textAlignment = kwargs.get("textAlignment", Alignment.RIGHT)
+		self.textAlignment = kwargs.get("textAlignment", Alignment.CENTER)
 
 		self.clickState = 0
 		self.prevClickState = 0
@@ -57,7 +57,7 @@ class Button(Label):
 			smallest = min(width, height)
 			marginSize = 10
 			marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
-			pygame.draw.rect(surface, self.borderColor, self.applyOffset(marginRect), self.border, round(smallest / 3))
+			pygame.draw.rect(surface, self.borderColor, marginRect, self.border, round(smallest / 3))
 
 	def draw(self, surface):
 		""" Draw a highlight when held down. """
@@ -67,7 +67,7 @@ class Button(Label):
 				smallest = min(width, height)
 				marginSize = 10
 				marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
-				pygame.draw.rect(surface, self.highLightColor, self.applyOffset(marginRect), self.highLightBorder, round(smallest / 3))
+				pygame.draw.rect(surface, self.highLightColor, marginRect, self.highLightBorder, round(smallest / 3))
 
 		super().draw(surface)
 
@@ -78,7 +78,7 @@ class Button(Label):
 			self.mpos = event.pos
 
 	def processEvents(self):
-		self.colliding = CheckCollision(self.applyOffset(self.rect), (*self.mpos, 0, 0))
+		self.colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
 		if self.colliding:
 			if self.isPressed():
 				self.isHeld = True
@@ -110,7 +110,7 @@ class CheckButton(Button):
 			if(self.borderVisible):
 				_, _, width, height = self.rect
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.highLightColor, self.applyOffset(self.rect), self.highLightBorder, round(smallest / 3))
+				pygame.draw.rect(surface, self.highLightColor, self.rect, self.highLightBorder, round(smallest / 3))
 		""" Draw the normal border to indicate it's a button. """
 		super().draw(surface)
 

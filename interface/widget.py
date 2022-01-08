@@ -18,21 +18,31 @@ class Widget(object):
 
 	def setParent(self, parent):
 		self.parent = parent
+	
+	def setSize(self, size):
+		width, height = size
+		x, y, _, _ = self.rect
+		self.rect = x, y, width, height
+	
+	def setPos(self, pos):
+		x, y = pos
+		_, _, width, height = self.rect
+		self.rect = x, y, width, height
 
-	def setOffset(self, offset):
-		self.offset = offset
+	# def setOffset(self, offset):
+	# 	self.offset = offset
 
-	def applyOffset(self, rect):
-		xo, yo = self.offset
-		x, y, width, height = rect
-		return (x + xo, y + yo, width, height)
+	# def applyOffset(self, rect):
+	# 	xo, yo = self.offset
+	# 	x, y, width, height = rect
+	# 	return (x + xo, y + yo, width, height)
 
 	def update(self):
 		pass
 
 	""" This functions allows for the drawing of a border """
 	def drawBorder(self, surface):
-		pygame.draw.rect(surface, self.borderColor, self.applyOffset(self.rect), 1)
+		pygame.draw.rect(surface, self.borderColor, self.rect, 1)
 	""" This function draws the widget """
 	def draw(self, surface):
 		if DebugDraw == False:
@@ -40,7 +50,7 @@ class Widget(object):
 		""" draw a basic border to indicate widget location and size """
 		self.drawBorder(surface)
 		""" a cross to make clear where the corners are and where the middle is in relation to other things. """
-		x, y, width, height = self.applyOffset(self.rect)
+		x, y, width, height = self.rect
 		pygame.draw.line(surface, self.crossColor1, (x, y), (x + width, y + height), 1)
 		pygame.draw.line(surface, self.crossColor2, (x, y + height), (x + width, y), 1)
 	""" this function sets the internal state based on outside events."""

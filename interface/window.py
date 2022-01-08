@@ -32,8 +32,10 @@ class App(Container):
 
 	def update(self):
 		for widget in self.widgets:
-			widget.setSize(self.rect)
-		super().update()
+			x, y, width, height = self.rect
+			size = width, height
+			widget.setSize(size)
+			widget.update()
 
 	def quitApplication(self):
 		pygame.quit()

@@ -16,10 +16,11 @@ class Container(Widget):
 	def update(self):
 		""" update widget offset relative to the parent """
 		for widget in self.widgets:
-			x, y, _, _ = self.rect
-			widget.setOffset((x, y))
-		""" call all update functions for the widgets in this container. """
-		for widget in self.widgets:
+			x, y, width, height = self.rect
+			pos = x, y
+			size = width, height
+			widget.setPos(pos)
+			widget.setSize(size)
 			widget.update()
 		super().update()
 
@@ -93,8 +94,12 @@ class Box(Container):
 		sectionSize = int(width / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):
-			widgetX, widgetY, widgetWidth, widgetHeight = widget.rect
-			widget.rect = x + i * sectionSize, y, sectionSize, height
+			pos = x + i * sectionSize, y
+			size = sectionSize, height
+			print(f"widget: {widget} pos: {pos} size: {size}")
+			widget.setPos(pos)
+			widget.setSize(size)
+			widget.update()
 
 	def updateVertical(self):
 		numWidgets = len(self.widgets)
@@ -102,16 +107,12 @@ class Box(Container):
 		sectionSize = int(height / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):
-			widgetX, widgetY, widgetWidth, widgetHeight = widget.rect
-			widget.rect = x, y + i * sectionSize, width, sectionSize
-
-	def setPosition(self, rect):
-		pass
-
-	def setSize(self, rect):
-		x, y, width, height = self.rect
-		rx, ry, rwidth, rheight = rect
-		self.rect = x, y, rwidth, rheight
+			pos = x, y + i * sectionSize
+			size = width, sectionSize
+			print(f"widget: {widget} pos: {pos} size: {size}")
+			widget.setPos(pos)
+			widget.setSize(size)
+			widget.update()
 
 	def update(self):
 		if not len(self.widgets):
@@ -122,5 +123,4 @@ class Box(Container):
 			self.updateHorizonal()
 		elif self.boxType == Box.VERTICAL:
 			self.updateVertical()
-
-		super().update()
+		
