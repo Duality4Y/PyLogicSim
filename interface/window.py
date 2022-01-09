@@ -32,9 +32,7 @@ class App(Container):
 
 	def update(self):
 		for widget in self.widgets:
-			x, y, width, height = self.rect
-			size = width, height
-			widget.setSize(size)
+			widget.assignArea(self.rect)
 			widget.update()
 
 	def quitApplication(self):

@@ -14,14 +14,10 @@ class Container(Widget):
 		self.widgets.append(widget)
 
 	def update(self):
-		""" update widget offset relative to the parent """
-		for widget in self.widgets:
-			x, y, width, height = self.rect
-			pos = x, y
-			size = width, height
-			widget.setPos(pos)
-			widget.setSize(size)
-			widget.update()
+		"""
+			simply delegate updating to the widget specific updating code may be implemented in different containers
+			which have different ways of dividing up the space for the widgets.
+		"""
 		super().update()
 
 	""" Draw all the widgets in the Container. """
@@ -49,6 +45,12 @@ class Pane(Container):
 		self.borderColor = GREEN
 		self.border = 1
 		self.borderWidth = 1
+	
+	def update(self):
+		super().update()
+		for widget in self.widgets:
+			widget.assignArea(self.rect)
+			widget.update()
 
 	def drawBorder(self, surface):
 		if self.borderVisible:
@@ -94,11 +96,8 @@ class Box(Container):
 		sectionSize = int(width / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):
-			pos = x + i * sectionSize, y
-			size = sectionSize, height
-			print(f"widget: {widget} pos: {pos} size: {size}")
-			widget.setPos(pos)
-			widget.setSize(size)
+			area = x + i * sectionSize, y, sectionSize, height
+			widget.assignArea(area)
 			widget.update()
 
 	def updateVertical(self):
@@ -107,14 +106,12 @@ class Box(Container):
 		sectionSize = int(height / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):
-			pos = x, y + i * sectionSize
-			size = width, sectionSize
-			print(f"widget: {widget} pos: {pos} size: {size}")
-			widget.setPos(pos)
-			widget.setSize(size)
+			area = x, y + i * sectionSize, width, sectionSize
+			widget.assignArea(area)
 			widget.update()
 
 	def update(self):
+		super().update()
 		if not len(self.widgets):
 			return
 

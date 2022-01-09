@@ -4,41 +4,48 @@ DebugDraw = True
 
 """ Basic Widget object that determines what other elements should look like"""
 class Widget(object):
+	(EXPAND,
+	 FILL,
+	 FIXED) = [i for i in range(0, 3)]
 	def __init__(self, *args, **kwargs):
 		self.offset = (0, 0)
+		self.area = None
 		self.rect = kwargs.get("rect", (0, 0, 100, 100))
 
 		self.parent = None
 
 		self.id = kwargs.get("id")
 
+		self.behaviour = Widget.EXPAND
+
 		self.borderColor = (0, 0, 0xff)
 		self.crossColor1 = (0xff, 0, 0)
 		self.crossColor2 = (0, 0xff, 0)
+	
+	def debugPrintParents(self):
+		print(f"child({type(self).__name__})->parent->", end="")
+		parent = self.parent
+		while parent:
+			print(f"{type(parent).__name__}", end="")
+			parent = parent.parent
+			if parent:
+				print("->", end="")
+		print()
 
 	def setParent(self, parent):
 		self.parent = parent
 	
-	def setSize(self, size):
-		width, height = size
-		x, y, _, _ = self.rect
-		self.rect = x, y, width, height
-	
-	def setPos(self, pos):
-		x, y = pos
-		_, _, width, height = self.rect
-		self.rect = x, y, width, height
-
-	# def setOffset(self, offset):
-	# 	self.offset = offset
-
-	# def applyOffset(self, rect):
-	# 	xo, yo = self.offset
-	# 	x, y, width, height = rect
-	# 	return (x + xo, y + yo, width, height)
+	def assignArea(self, area):
+		# print(f"widget({self})->area: {area}")
+		self.area = area
 
 	def update(self):
-		pass
+		if self.behaviour == Widget.EXPAND:
+			self.rect = self.area
+		elif self.behaviour == Widget.FILL:
+			self.rect = self.area
+		elif self.behaviour == Widget.FIXED:
+			return;
 
 	""" This functions allows for the drawing of a border """
 	def drawBorder(self, surface):

@@ -85,6 +85,7 @@ class Button(Label):
 				if self.pressedCallback:
 					self.pressedCallback(self)
 			if self.isReleased():
+				self.debugPrintParents()
 				if self.releasedCallback:
 					self.releasedCallback(self)
 		""" update button state when mouse not on it but still releases button """
@@ -108,9 +109,11 @@ class CheckButton(Button):
 		""" fill in the button if button is set. """
 		if(self.marked):
 			if(self.borderVisible):
-				_, _, width, height = self.rect
+				x, y, width, height = self.rect
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.highLightColor, self.rect, self.highLightBorder, round(smallest / 3))
+				marginSize = 10
+				marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
+				pygame.draw.rect(surface, self.highLightColor, marginRect, self.highLightBorder, round(smallest / 3))
 		""" Draw the normal border to indicate it's a button. """
 		super().draw(surface)
 
