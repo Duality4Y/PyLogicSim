@@ -12,10 +12,6 @@ class Button(Label):
 		self.mpos = 0, 0
 
 		""" Custom label properties for a button. """
-		self.borderPadding = self.border * 2
-		_, _, textWidth, textHeight = self.textRect
-		self.rect = (50, 50, textWidth * 1.5 + self.defaultPadding + self.borderPadding + 200, textHeight * 1.5 + self.defaultPadding + self.borderPadding)
-		self.borderColor = [169] * 3
 		self.textAlignment = kwargs.get("textAlignment", Alignment.CENTER)
 
 		self.clickState = 0
@@ -27,18 +23,10 @@ class Button(Label):
 		self.pressedCallback = None
 		self.releasedCallback = None
 
-		"""
-			if highLightBorder has a value high then zero an highlight border that size is draw
-			if highLightBorder is zero then the rect is filled.
+		self.selectedColor = (0, 0xff >> 1, 0)
 
-			used for indicating a button is set or pressed down.
-		"""
-		self.highLightBorder = 0
-
-		self.highLightColor = GREEN
-		self.highLightColor = (0, 0xff >> 1, 0)
-
-		self.colliding = False
+		self.mouseHover = False
+		self.hoverColor = (0x66, 0x99, 0xCC)
 		self.isHeld = False
 
 	def setClickState(self, clickState):
@@ -53,23 +41,24 @@ class Button(Label):
 	def drawBorder(self, surface):
 		""" Draw a border rectangular. """
 		if(self.borderVisible):
-			x, y, width, height = self.rect
+			x, y, width, height = self.borderArea
 			smallest = min(width, height)
-			marginSize = 10
-			marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
-			pygame.draw.rect(surface, self.borderColor, marginRect, self.border, round(smallest / 3))
+			
+			borderColor = self.borderColor
+			if self.mouseHover:
+				borderColor = self.hoverColor
+			
+			pygame.draw.rect(surface, borderColor, self.borderArea, self.borderFill, round(smallest / 3))
 
-	def draw(self, surface):
+	def drawContent(self, surface):
 		""" Draw a highlight when held down. """
 		if self.isHeld:
 			if(self.borderVisible):
-				x, y, width, height = self.rect
+				x, y, width, height = self.contentArea
 				smallest = min(width, height)
-				marginSize = 10
-				marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
-				pygame.draw.rect(surface, self.highLightColor, marginRect, self.highLightBorder, round(smallest / 3))
+				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / 3))
+		super().drawContent(surface)
 
-		super().draw(surface)
 
 	def handleEvents(self, event):
 		leftMouseBtn, _, _ = pygame.mouse.get_pressed()
@@ -78,8 +67,8 @@ class Button(Label):
 			self.mpos = event.pos
 
 	def processEvents(self):
-		self.colliding = CheckCollision(self.rect, (*self.mpos, 0, 0))
-		if self.colliding:
+		self.mouseHover = CheckCollision(self.contentArea, (*self.mpos, 0, 0))
+		if self.mouseHover:
 			if self.isPressed():
 				self.isHeld = True
 				if self.pressedCallback:
@@ -105,20 +94,15 @@ class CheckButton(Button):
 	def toggleMarked(self, widget):
 		self.marked = not self.marked
 
-	def draw(self, surface):
+	def drawContent(self, surface):
 		""" fill in the button if button is set. """
 		if(self.marked):
 			if(self.borderVisible):
-				x, y, width, height = self.rect
+				x, y, width, height = self.contentArea
 				smallest = min(width, height)
-				marginSize = 10
-				marginRect = x + marginSize, y + marginSize, width - marginSize * 2, height - marginSize * 2
-				pygame.draw.rect(surface, self.highLightColor, marginRect, self.highLightBorder, round(smallest / 3))
+				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / 3))
 		""" Draw the normal border to indicate it's a button. """
-		super().draw(surface)
-
-	def handleEvents(self, event):
-		super().handleEvents(event)
+		super().drawContent(surface)
 
 	def processEvents(self):
 		super().processEvents()

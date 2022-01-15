@@ -89,29 +89,71 @@ class TestApp(App):
 		# button.pressedCallback = self.pressedCallback
 		# self.addWidget(button)
 
-		box = Box(type=Box.VERTICAL)
-		box2 = Box(type=Box.HORIZONTAL)
-		box2.borderColor = (0xff, 0, 0)
+
+
+
+
+		# box = Box(type=Box.VERTICAL)
+		# box2 = Box(type=Box.HORIZONTAL)
+		# box2.borderColor = (0xff, 0, 0)
 		
-		box.addWidget(Widget())
-		box.addWidget(box2)
-		box.addWidget(Pane())
-		box.addWidget(Button())
-		box.addWidget(Button())
-		box.addWidget(Button())
+		# # box.addWidget(Widget())
+		# box.addWidget(Button())
+		# box.addWidget(box2)
+		# box.addWidget(Button())
+		# box.addWidget(Button())
+		# box.addWidget(Button())
+		# newBox = Box()
+		# newBox.addWidget(Label(text="label 1"))
+		# newBox.addWidget(CheckButton(text="CheckButton"))
+		# newBox.addWidget(Button(text="But no"))
+		# box.addWidget(newBox)
+		# box.addWidget(Label(text="Hello, World!"))
 
-		box2.id = 42
-		box2.addWidget(Button(text="1", textAlignment=Alignment.CENTER))
-		box2.addWidget(Button(text="2", textAlignment=Alignment.CENTER))
-		box2.addWidget(Button(text="3", textAlignment=Alignment.CENTER))
-		box2.addWidget(Pane())
-		# box2.addWidget(Label())
+		# box2.id = 42
+		# box2.addWidget(Button(text="1"))
+		# box2.addWidget(Button(text="2"))
+		# box2.addWidget(Button(text="3"))
+		# pane = Pane()
+		# pane.addWidget(Button())
+		# box2.addWidget(pane)
+		# # box2.addWidget(Grid())
+		# box2.addWidget(Box())
+		# # box2.addWidget(Container())
+		# # box2.addWidget(Label(text="ABC"))
 		# box2.addWidget(Widget())
 
-		# box2.addWidget(Widget())
-		# box2.addWidget(Widget())
+		# # box2.addWidget(Widget())
+		# # box2.addWidget(Widget())
 
-		self.addWidget(box)
+		# self.addWidget(box)
+
+
+
+		# label = Label(text="A line of Text but longer A line of Text", behaviour=Widget.FIXED)
+		# label.setPosition((200, 200))
+		# self.addWidget(label)
+
+		# widget = Widget(behaviour=Widget.FIXED)
+		# widget.setPosition((200, 200))
+		# self.addWidget(widget)
+
+		container = Box(type=Box.VERTICAL)
+		container2 = Box(type=Box.HORIZONTAL)
+		container2.setPosition((200, 200))
+		container2.addWidget(Container())
+		container2.addWidget(Label(text="label", textAlign=Alignment.RIGHT))
+		container2.addWidget(Button(text="Hello"))
+		container2.addWidget(CheckButton(text="Hello"))
+		container2.addWidget(Pane())
+		container.addWidget(container2)
+		container.addWidget(Container())
+		container.addWidget(Label(text="box", textAlign=Alignment.LEFT))
+		container.addWidget(Button(text="box"))
+		container.addWidget(CheckButton(text="original"))
+		container.addWidget(Pane())
+		self.addWidget(container)
+
 
 	def checkCallback(self, widget):
 		if(widget.marked):

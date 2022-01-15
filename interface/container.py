@@ -2,6 +2,7 @@ import pygame
 
 from interface.widget import Widget
 
+from interface.rectUtils import *
 from interface.colorDefs import *
 
 class Container(Widget):
@@ -19,10 +20,12 @@ class Container(Widget):
 			which have different ways of dividing up the space for the widgets.
 		"""
 		super().update()
+		for widget in self.widgets:
+			widget.update()
 
 	""" Draw all the widgets in the Container. """
 	def draw(self, surface):
-		self.drawBorder(surface)
+		super().draw(surface)
 		for widget in self.widgets:
 			widget.draw(surface)
 
@@ -42,28 +45,26 @@ class Pane(Container):
 
 		self.borderVisible = True
 
-		self.borderColor = GREEN
-		self.border = 1
-		self.borderWidth = 1
+		self.borderColor = (0x90, 0xEE, 0x90)
+		self.borderFill = 1
+		self.borderSize = 4
 	
 	def update(self):
 		super().update()
 		for widget in self.widgets:
-			widget.assignArea(self.rect)
+			widget.assignArea(self.contentArea)
 			widget.update()
 
 	def drawBorder(self, surface):
 		if self.borderVisible:
-			x, y, width, height = self.rect
-			rect = x, y, width, height
-			# outer border is easy to draw it is just the bounding rectangle.
-			pygame.draw.rect(surface, self.borderColor, rect, self.border)
-			# calculate inner border and draw it
-			inner = x + self.borderWidth + self.border * 2, \
-					y + self.borderWidth + self.border * 2, \
-					width - (self.borderWidth + self.border * 2) * 2, \
-					height - (self.borderWidth + self.border * 2) * 2
-			pygame.draw.rect(surface, self.borderColor, inner, self.border, border_radius=10)
+			# outer border is easy to draw it is just the bounding rectangle of the border.
+			pygame.draw.rect(surface, self.borderColor, self.borderArea, self.borderFill)
+			# the inner is just the outer but shrunk down made it conditional so it looks nicer.
+			if self.borderSize:
+				inner = shrinkArea(self.borderArea, self.borderSize - 1)
+			else:
+				inner = shrinkArea(self.borderArea, self.borderSize)
+			pygame.draw.rect(surface, self.borderColor, inner, self.borderFill, border_radius=10)
 
 class Grid(Widget):
 	def __init__(self, *args, **kwargs):
@@ -92,7 +93,7 @@ class Box(Container):
 
 	def updateHorizonal(self):
 		numWidgets = len(self.widgets)
-		x, y, width, height = self.rect
+		x, y, width, height = self.contentArea
 		sectionSize = int(width / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):
@@ -102,7 +103,7 @@ class Box(Container):
 
 	def updateVertical(self):
 		numWidgets = len(self.widgets)
-		x, y, width, height = self.rect
+		x, y, width, height = self.contentArea
 		sectionSize = int(height / numWidgets)
 		
 		for i, widget in enumerate(self.widgets):

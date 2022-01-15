@@ -17,7 +17,7 @@ screenSize = screenWidth, screenHeight = 800, 600
 screen = pygame.display.set_mode(screenSize)
 
 fontName = "Roboto-Regular.ttf"
-fontSize = 18
+fontSize = 17
 
 fontResourcePath = os.path.join(projectRoot, "resources/fonts")
 fontPath = os.path.join(fontResourcePath, fontName)
@@ -28,11 +28,11 @@ class App(Container):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.Running = True
-		self.rect = kwargs.get('rect', (0, 0, *screenSize))
+		self.area = kwargs.get('area', (0, 0, *screenSize))
 
 	def update(self):
 		for widget in self.widgets:
-			widget.assignArea(self.rect)
+			widget.assignArea(self.area)
 			widget.update()
 
 	def quitApplication(self):
