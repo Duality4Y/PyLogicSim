@@ -90,6 +90,7 @@ class Box(Container):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.boxType = kwargs.get('type', Box.HORIZONTAL)
+		self.behaviour = Widget.FILL
 
 	def updateHorizonal(self):
 		numWidgets = len(self.widgets)
@@ -121,4 +122,16 @@ class Box(Container):
 			self.updateHorizonal()
 		elif self.boxType == Box.VERTICAL:
 			self.updateVertical()
+		
+
+class PackedBox(Box):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.spacing = kwargs.get("spacing", 2)
+	
+	def updateHorizonal(self):
+		pass
+
+	def updateVertical(self):
+		pass
 		

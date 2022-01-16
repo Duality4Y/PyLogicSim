@@ -29,6 +29,8 @@ class Button(Label):
 		self.hoverColor = (0x66, 0x99, 0xCC)
 		self.isHeld = False
 
+		self.paddingSize = 0
+
 	def setClickState(self, clickState):
 		self.clickState = clickState
 
@@ -48,7 +50,7 @@ class Button(Label):
 			if self.mouseHover:
 				borderColor = self.hoverColor
 			
-			pygame.draw.rect(surface, borderColor, self.borderArea, self.borderFill, round(smallest / 3))
+			pygame.draw.rect(surface, borderColor, self.borderArea, self.borderSize, round(smallest / 3))
 
 	def drawContent(self, surface):
 		""" Draw a highlight when held down. """

@@ -3,7 +3,7 @@ import pygame
 from interface.rectUtils import *
 from interface.colorDefs import *
 
-# DebugDraw = True
+DebugDraw = True
 DebugDraw = False
 
 """ Basic Widget object that determines what other elements should look like"""
@@ -23,7 +23,7 @@ class Widget(object):
 		self.borderArea = (0, 0, 100, 100)
 		self.marginArea = (0, 0, 100, 100)
 
-		self.marginSize = 8
+		self.marginSize = 3
 		self.borderSize = 1
 		self.paddingSize = 2
 
@@ -87,7 +87,10 @@ class Widget(object):
 			self.paddingArea = shrinkArea(self.borderArea, size=self.borderSize)
 			self.contentArea = shrinkArea(self.paddingArea, size=self.paddingSize)
 		elif self.behaviour == Widget.FILL:
-			self.area = self.area
+			self.marginArea = self.area
+			self.borderArea = self.marginArea
+			self.paddingArea = shrinkArea(self.borderArea, size=self.borderSize)
+			self.contentArea = shrinkArea(self.paddingArea, size=self.paddingSize)
 		elif self.behaviour == Widget.FIXED:
 			self.area = self.calculateAreaRect()
 			self.marginArea = self.area
@@ -102,11 +105,11 @@ class Widget(object):
 		pygame.draw.line(surface, self.crossColor1, (x, y), (x + width, y + height), 1)
 		pygame.draw.line(surface, self.crossColor2, (x, y + height), (x + width, y), 1)
 	
-	def colorSurface(self, area, color, alpha=80):
-		surface = pygame.Surface(getAreaSize(area))
-		surface.fill(color)
-		surface.set_alpha(alpha)
-		return surface, getAreaPosition(area)
+	# def colorSurface(self, area, color, alpha=80):
+	# 	surface = pygame.Surface(getAreaSize(area))
+	# 	surface.fill(color)
+	# 	surface.set_alpha(alpha)
+	# 	return surface, getAreaPosition(area)
 
 	def drawLayout(self, surface):
 		pygame.draw.rect(surface, GREEN, self.marginArea, 0)
@@ -124,13 +127,13 @@ class Widget(object):
 	
 	""" This function draws the widget """
 	def draw(self, surface):
+		""" if enabled draws the layout for debugging purposes. """
+		if DebugDraw:
+			self.drawLayout(surface)
 		""" draw the widget contents"""
 		self.drawContent(surface)
 		""" draw a basic border to indicate widget location and size """
 		self.drawBorder(surface)
-		""" if enabled draws the layout for debugging purposes. """
-		if DebugDraw:
-			self.drawLayout(surface)
 	
 	""" this function sets the internal state based on outside events."""
 	def handleEvents(self, event):

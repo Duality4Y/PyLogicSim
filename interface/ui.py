@@ -12,19 +12,7 @@ from interface.container import Pane
 from interface.container import Grid
 from interface.container import Container
 from interface.alignment import Alignment
-
-# def EdgeDetector(object):
-# 	def __init__(self):
-# 		self.currState = 0
-# 		self.prevState = 0
-# 		(self.unchanging,
-# 		 self.falling,
-# 		 self.rising) = [i for i in range(0, 2)]
-# 		self.state = self.unchanging
-
-# 	def update(self, state):
-# 		self.currState = state
-# 		if self.currState > self.prevState:
+from interface.container import PackedBox
 
 class Indicator(CheckButton):
 	def __init__(self, *args, **kwargs):
@@ -138,22 +126,62 @@ class TestApp(App):
 		# widget.setPosition((200, 200))
 		# self.addWidget(widget)
 
-		container = Box(type=Box.VERTICAL)
-		container2 = Box(type=Box.HORIZONTAL)
-		container2.setPosition((200, 200))
-		container2.addWidget(Container())
-		container2.addWidget(Label(text="label", textAlign=Alignment.RIGHT))
-		container2.addWidget(Button(text="Hello"))
-		container2.addWidget(CheckButton(text="Hello"))
-		container2.addWidget(Pane())
-		container.addWidget(container2)
-		container.addWidget(Container())
-		container.addWidget(Label(text="box", textAlign=Alignment.LEFT))
-		container.addWidget(Button(text="box"))
-		container.addWidget(CheckButton(text="original"))
-		container.addWidget(Pane())
-		self.addWidget(container)
+		# container = Box(type=Box.VERTICAL)
+		# container2 = Box(type=Box.HORIZONTAL)
+		# container2.setPosition((200, 200))
+		# container2.addWidget(Container())
+		# container2.addWidget(Label(text="label", textAlign=Alignment.RIGHT))
+		# container2.addWidget(Button(text="Hello"))
+		# container2.addWidget(CheckButton(text="Hello"))
+		# container2.addWidget(Pane())
+		# container.addWidget(container2)
+		# container.addWidget(Container())
+		# container.addWidget(Label(text="box", textAlign=Alignment.LEFT))
+		# container.addWidget(Button(text="box"))
+		# container.addWidget(CheckButton(text="original"))
+		# container.addWidget(Pane())
+		# self.addWidget(container)
 
+		# container = PackedBox(type=PackedBox.VERTICAL)
+		# self.addWidget(container)
+		# widget = Widget(behaviour=Widget.FILL)
+
+		# box = Box(type=Box.HORIZONTAL)
+		# b2 = Box(type=Box.VERTICAL)
+		# b2.addWidget(Widget())
+		# b2.addWidget(Widget())
+		# box.addWidget(b2)
+		# box.addWidget(Widget(behaviour=Widget.EXPAND))
+		# self.addWidget(box)
+
+		from devices.MC14K5.MC14K5 import LogicUnit
+		
+		vbox = Box(type=Box.VERTICAL)
+		self.addWidget(vbox)
+
+		hbox0 = Box(type=Box.HORIZONTAL)
+		hbox1 = Box(type=Box.HORIZONTAL)
+		hbox2 = Box(type=Box.HORIZONTAL)
+		hbox3 = Box(type=Box.HORIZONTAL)
+		vbox.addWidget(hbox0)
+		vbox.addWidget(hbox1)
+		vbox.addWidget(hbox2)
+		# vbox.addWidget(hbox3)
+
+		logicUnit = LogicUnit()
+		deviceName = Label(text=logicUnit.name, behaviour=Widget.FIXED)
+		hbox0.addWidget(deviceName)
+		self.addInput(hbox1, logicUnit.Data, "Data")
+	
+	def addInput(self, box, input, text):
+		checkbutton = CheckButton(text=text)
+		checkbutton.checkCallback = self.setLogic
+		checkbutton.id = input
+		box.addWidget(checkbutton)
+	
+	def setLogic(self, widget):
+		print(type(widget.id))
+		widget.id = 42
 
 	def checkCallback(self, widget):
 		if(widget.marked):
