@@ -12,19 +12,27 @@
 """
 
 class Part(object):
-	def __init__(self, numInputs=0, numOutputs=0, name="Unknown", lines=["Not", "available"]):
-		self.numInputs = numInputs
-		self.numOutputs = numOutputs
-
+	# def __init__(self, numInputs=0, numOutputs=0, name="Unknown", lines=["Not", "available"]):
+	def __init__(self, *args, **kwargs):
 		self.inputs = []
 		self.outputs = []
 		
-		self._name = name
-		self.lines = lines
+		self._name = kwargs.get("name", "Unknown")
+		# self.lines = kwargs.get("lines", ["Not", "available"])
+		self.lines = []
 
-		self._alignsize = max(len(item) for item in lines) + 1
-		self._fmt = "{{0:{0}}}".format(self._alignsize)
+		self._alignsize = 0
+		self._fmt = ""
 		self._tableSeperator = "|"
+
+	def updateTable(self):
+		self._alignsize = max(len(item) for item in self.lines) + 1
+		self._fmt = "{{0:{0}}}".format(self._alignsize)
+
+	def updateLines(self):
+		self.lines = []
+		for io in (*self.inputs, *self.outputs):
+			self.lines.append(io.__name__)
 
 	@property
 	def name(self):
@@ -35,15 +43,20 @@ class Part(object):
 
 	def getLineTable(self):
 		return self.buildTable(self.lines)
+	
+	def addInput(self, input):
+		self.inputs.append(input)
+		self.updateLines()
+		self.updateTable()
 
-	def setInput(self, *args):
-		pass
-
-	def getOutput(self):
-		return None
+	def addOutput(self, output):
+		self.outputs.append(output)
+		self.updateLines()
+		self.updateTable()
 
 	def process(self):
 		pass
 
 	def __repr__(self):
-		return "Basic Part no states"
+		states = [state() for state in (*self.inputs, *self.outputs)]
+		return self.buildTable(states)

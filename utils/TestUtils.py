@@ -15,9 +15,11 @@ def getPulseShape(risingPulse):
 def testPart(part):
 	print("Testing '{0}' part.".format(part.name))
 	print(part.getLineTable())
-	for i in range(0, 2 ** part.numInputs):
+
+	numInputs = len(part.inputs)
+	for i in range(0, 2 ** numInputs):
 		inValues = []
-		for bitPos in range(0, part.numInputs):
+		for bitPos in range(0, numInputs):
 			inValues.insert(0, (i >> bitPos) & 0x01)
 		part.setInput(*inValues)
 		part.process()
