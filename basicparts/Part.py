@@ -12,13 +12,11 @@
 """
 
 class Part(object):
-	# def __init__(self, numInputs=0, numOutputs=0, name="Unknown", lines=["Not", "available"]):
 	def __init__(self, *args, **kwargs):
 		self.inputs = []
 		self.outputs = []
 		
 		self._name = kwargs.get("name", "Unknown")
-		# self.lines = kwargs.get("lines", ["Not", "available"])
 		self.lines = []
 
 		self._alignsize = 0
