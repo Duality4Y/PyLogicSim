@@ -22,20 +22,16 @@ class SRLatch(Part):
 		self.process()
 
 	def Set(self, *args):
-		if args: self.nor2.B(*args)
-		return self.nor2.B()
+		return self.nor2.B(*args)
 	
 	def Reset(self, *args):
-		if args: self.nor1.A(*args)
-		return self.nor1.A()
+		return self.nor1.A(*args)
 	
 	def Q(self, *args):
-		if args: self.nor1.Q(*args)
-		return self.nor1.Q()
+		return self.nor1.Q(*args)
 
 	def Qn(self, *args):
-		if args: self.nor2.Q(*args)
-		return self.nor2.Q()
+		return self.nor2.Q(*args)
 
 	def setInput(self, Reset, Set):
 		self.Reset(Reset)
@@ -69,26 +65,20 @@ class GatedLatch(Part):
 		self.addOutput(self.Qn)
 
 	def Clk(self, *args):
-		if args:
-			self.and1.B(*args)
-			self.and2.A(*args)
-		return self.and1.B()
+		self.and2.A(*args)
+		return self.and1.B(*args)
 
 	def Reset(self, *args):
-		if args: self.and1.A(*args)
-		return self.and1.A()
+		return self.and1.A(*args)
 
 	def Set(self, *args):
-		if args: self.and2.B(*args)
-		return self.and2.B()
+		return self.and2.B(*args)
 
 	def Q(self, *args):
-		if args: self.latch.Q(*args)
-		return self.latch.Q()
+		return self.latch.Q(*args)
 
 	def Qn(self, *args):
-		if args: self.latch.Qn(*args)
-		return self.latch.Qn()
+		return self.latch.Qn(*args)
 
 	def setInput(self, Clk, Reset, Set):
 		self.Clk(Clk)
@@ -119,20 +109,16 @@ class DataLatch(Part):
 		self.addOutput(self.Qn)
 	
 	def Clk(self, *args):
-		if args: self.latch.Clk(*args)
-		return self.latch.Clk()
+		return self.latch.Clk(*args)
 	
 	def Data(self, *args):
-		if args: self.notGate.A(*args)
-		return self.notGate.A()
+		return self.notGate.A(*args)
 	
 	def Q(self, *args):
-		if args: self.latch.Q(*args)
-		return self.latch.Q()
+		return self.latch.Q(*args)
 	
 	def Qn(self, *args):
-		if args: self.latch.Qn(*args)
-		return self.latch.Qn()
+		return self.latch.Qn(*args)
 
 	def setInput(self, Clk, Data):
 		self.Clk(Clk)

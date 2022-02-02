@@ -28,9 +28,9 @@ def toggleClk(part, risingPulse=True):
 	pulseShape = getPulseShape(risingPulse)
 	for clkstate in pulseShape:
 		if hasattr(part, "Clk"):
-			part.Clk = clkstate # normal flipflops have a clk input
+			part.Clk(clkstate) # normal flipflops have a clk input
 		elif hasattr(part, "T"):
-			part.T = clkstate # toggle flipflop has a T which is basically a clock input too
+			part.T(clkstate) # toggle flipflop has a T which is basically a clock input too
 		part.process()
 		print(part)
 
