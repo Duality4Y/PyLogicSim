@@ -32,7 +32,6 @@ if __name__ == "__main__":
 	testPart(SRLatch())
 	testPart(GatedLatch())
 	testPart(DataLatch())
-	exit()
 
 	testPart(HalfAdder())
 	testPart(FullAdder())
@@ -44,6 +43,7 @@ if __name__ == "__main__":
 	testPart(Decoder())
 	TestMux(Mux())
 	testPart(DeMux())
+	exit()
 
 
 	MC14K5.TestLU()
