@@ -28,7 +28,8 @@ class Widget(object):
 		self.paddingSize = 2
 
 		self.borderColor = (0x80, 0x80, 0x80)
-		self.borderFill = 1
+		self.borderFill = 2
+		self.cornerRatio = 24
 
 		self.behaviour = kwargs.get("behaviour", Widget.EXPAND)
 

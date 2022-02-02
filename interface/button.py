@@ -50,7 +50,7 @@ class Button(Label):
 			if self.mouseHover:
 				borderColor = self.hoverColor
 			
-			pygame.draw.rect(surface, borderColor, self.borderArea, self.borderSize, round(smallest / 3))
+			pygame.draw.rect(surface, borderColor, self.borderArea, self.borderFill, round(smallest / self.cornerRatio))
 
 	def drawContent(self, surface):
 		""" Draw a highlight when held down. """
@@ -58,7 +58,7 @@ class Button(Label):
 			if(self.borderVisible):
 				x, y, width, height = self.contentArea
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / 3))
+				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / self.cornerRatio))
 		super().drawContent(surface)
 
 
@@ -102,7 +102,7 @@ class CheckButton(Button):
 			if(self.borderVisible):
 				x, y, width, height = self.contentArea
 				smallest = min(width, height)
-				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / 3))
+				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / self.cornerRatio))
 		""" Draw the normal border to indicate it's a button. """
 		super().drawContent(surface)
 

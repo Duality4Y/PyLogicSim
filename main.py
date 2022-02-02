@@ -11,14 +11,14 @@ from utils.TestUtils import numToBits, clockPart
 
 from devices.MC14K5 import MC14K5
 
-from interface.ui import TestApp
+# from interface.ui import TestApp
 
 if __name__ == "__main__":
 	print("Hello, world!")
 
-	app = TestApp()
-	app.run()
-	exit()
+	# app = TestApp()
+	# app.run()
+	# exit()
 
 	testPart(And())
 	testPart(Or())
@@ -32,6 +32,7 @@ if __name__ == "__main__":
 	testPart(SRLatch())
 	testPart(GatedLatch())
 	testPart(DataLatch())
+	exit()
 
 	testPart(HalfAdder())
 	testPart(FullAdder())

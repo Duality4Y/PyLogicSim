@@ -3,169 +3,147 @@ from basicparts.Gates import Nor, And, Not
 
 class SRLatch(Part):
 	def __init__(self):
+		super().__init__(name=SRLatch.__name__)
+
 		self.nor1 = Nor()
 		self.nor2 = Nor()
 
-		# force initial state of zero for Q
-		self.setInput(1, 0)
+		self.addInput(self.Reset)
+		self.addInput(self.Set)
+		self.addOutput(self.Q)
+		self.addOutput(self.Qn)
+
+		# Cheeky way to force output to zero and input to zero.
+		# normal latches do not work like this.
+		self.Reset(0)
+		self.Set(0)
+		self.Q(0)
+		self.Qn(0)
 		self.process()
 
-		super().__init__(numInputs=2, numOutputs=2,
-						 name=SRLatch.__name__,
-						 lines=["Reset", "Set", "Q", "Qn"])
+	def Set(self, *args):
+		if args: self.nor2.B(*args)
+		return self.nor2.B()
+	
+	def Reset(self, *args):
+		if args: self.nor1.A(*args)
+		return self.nor1.A()
+	
+	def Q(self, *args):
+		if args: self.nor1.Q(*args)
+		return self.nor1.Q()
 
-	@property
-	def Set(self):
-		return self.nor2.B
-	@Set.setter
-	def Set(self, value):
-		self.nor2.B = value
-
-	@property
-	def Reset(self):
-		return self.nor1.A
-	@Reset.setter
-	def Reset(self, value):
-		self.nor1.A = value
-
-	@property
-	def Q(self):
-		return self.nor1.Q
-
-	@property
-	def Qn(self):
-		return self.nor2.Q
+	def Qn(self, *args):
+		if args: self.nor2.Q(*args)
+		return self.nor2.Q()
 
 	def setInput(self, Reset, Set):
-		self.Reset = Reset
-		self.Set = Set
+		self.Reset(Reset)
+		self.Set(Set)
 
 	def getOutput(self):
 		return (self.Q, self.Qn)
 
 	def process(self):
-		self.nor1.setInput(self.Reset, self.Qn)
-		self.nor2.setInput(self.Q, self.Set)
+		self.nor1.setInput(self.Reset(), self.Qn())
+		self.nor2.setInput(self.Q(), self.Set())
 		self.nor1.process()
 		self.nor2.process()
-		# print(f"{self.Q = }")
 
-		self.nor1.setInput(self.Reset, self.Qn)
-		self.nor2.setInput(self.Q, self.Set)
+		self.nor1.setInput(self.Reset(), self.Qn())
+		self.nor2.setInput(self.Q(), self.Set())
 		self.nor1.process()
 		self.nor2.process()
-		# print(f"{self.Q = }")
-
-	def __repr__(self):
-		states = [self.Reset, self.Set, self.Q, self.Qn]
-		return self.buildTable(states)
 
 class GatedLatch(Part):
 	def __init__(self):
+		super().__init__(name=GatedLatch.__name__)
 		self.latch = SRLatch()
 		self.and1 = And()
 		self.and2 = And()
 
-		super().__init__(numInputs=3, numOutputs=2,
-						 name=GatedLatch.__name__,
-						 lines=["Clk", "Reset", "Set", "Q", "Qn"])
+		self.addInput(self.Clk)
+		self.addInput(self.Reset)
+		self.addInput(self.Set)
+		self.addOutput(self.Q)
+		self.addOutput(self.Qn)
 
-	@property
-	def Clk(self):
-		return self.and1.B
-	@Clk.setter
-	def Clk(self, value):
-		self.and1.B = value
-		self.and2.A = value
+	def Clk(self, *args):
+		if args:
+			self.and1.B(*args)
+			self.and2.A(*args)
+		return self.and1.B()
 
-	@property
-	def Reset(self):
-		return self.and1.A
-	@Reset.setter
-	def Reset(self, value):
-		self.and1.A = value
+	def Reset(self, *args):
+		if args: self.and1.A(*args)
+		return self.and1.A()
 
-	@property
-	def Set(self):
-		return self.and2.B
-	@Set.setter
-	def Set(self, value):
-		self.and2.B = value
+	def Set(self, *args):
+		if args: self.and2.B(*args)
+		return self.and2.B()
 
-	@property
-	def Q(self):
-		return self.latch.Q
-	@property
-	def Qn(self):
-		return self.latch.Qn
+	def Q(self, *args):
+		if args: self.latch.Q(*args)
+		return self.latch.Q()
+
+	def Qn(self, *args):
+		if args: self.latch.Qn(*args)
+		return self.latch.Qn()
 
 	def setInput(self, Clk, Reset, Set):
-		self.Clk = Clk
-		self.Reset = Reset
-		self.Set = Set
+		self.Clk(Clk)
+		self.Reset(Reset)
+		self.Set(Set)
 
 	def getOutput(self):
-		return (self.Q, self.Qn)
+		return (self.Q(), self.Qn())
 
 	def process(self):
 		self.and1.process()
 		self.and2.process()
 
-		self.latch.Reset = self.and1.Q
-		self.latch.Set = self.and2.Q
+		self.latch.Reset(self.and1.Q())
+		self.latch.Set(self.and2.Q())
 		self.latch.process()
-
-	def __repr__(self):
-		states = [self.Clk, self.Reset, self.Set, self.Q, self.Qn]
-		return self.buildTable(states)
 
 class DataLatch(Part):
 	def __init__(self):
+		super().__init__(name=DataLatch.__name__)
+
 		self.latch = GatedLatch()
 		self.notGate = Not()
 
-		super().__init__(numInputs=2, numOutputs=2,
-						 name=DataLatch.__name__,
-						 lines=["Clk", "Data", "Q", "Qn"])
-
-	@property
-	def Clk(self):
-		return self.latch.Clk
-
-	@Clk.setter
-	def Clk(self, value):
-		self.latch.Clk = value
-
-	@property
-	def Data(self):
-		return self.notGate.A
-
-	@Data.setter
-	def Data(self, value):
-		self.notGate.A = value
-
-	@property
-	def Q(self):
-		return self.latch.Q
-
-	@property
-	def Qn(self):
-		return self.latch.Qn
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		self.addOutput(self.Q)
+		self.addOutput(self.Qn)
+	
+	def Clk(self, *args):
+		if args: self.latch.Clk(*args)
+		return self.latch.Clk()
+	
+	def Data(self, *args):
+		if args: self.notGate.A(*args)
+		return self.notGate.A()
+	
+	def Q(self, *args):
+		if args: self.latch.Q(*args)
+		return self.latch.Q()
+	
+	def Qn(self, *args):
+		if args: self.latch.Qn(*args)
+		return self.latch.Qn()
 
 	def setInput(self, Clk, Data):
-		self.Clk = Clk
-		self.Data = Data
+		self.Clk(Clk)
+		self.Data(Data)
 
 	def getOutput(self):
-		return (self.Q, self.Qn)
+		return (self.Q(), self.Qn())
 
 	def process(self):
 		self.notGate.process()
 
-		self.latch.Reset = self.notGate.Q
-		self.latch.Set = self.notGate.A
+		self.latch.Reset(self.notGate.Q())
+		self.latch.Set(self.notGate.A())
 		self.latch.process()
-
-	def __repr__(self):
-		states = [self.Clk, self.Data, self.Q, self.Qn]
-		return self.buildTable(states)

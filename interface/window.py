@@ -57,6 +57,7 @@ class App(Container):
 					self.Running = False
 			""" process and draw all the events."""
 			screen.fill(BLACK)
+			self.processEvents()
 			for widget in self.widgets:
 				widget.processEvents()
 				widget.draw(screen)
