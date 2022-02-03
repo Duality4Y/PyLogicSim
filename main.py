@@ -48,10 +48,9 @@ if __name__ == "__main__":
 
 	testPart(MC14K5.Decoder())
 	testPart(MC14K5.Mux())
-	exit()
 	testPart(MC14K5.InstrDecoder())
-	testPart(MC14K5.InstrRegister())
 	testFlipFlop(MC14K5.InstrRegister())
+	exit()
 	# testPart(MC14K5.ControlUnit())
 
 	instr = MC14K5.Instructions()

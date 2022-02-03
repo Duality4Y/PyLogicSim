@@ -199,7 +199,9 @@ class Decoder(Part):
 
 class InstrDecoder(Part):
 	def __init__(self):
-		""" To lazy to code write 16 decoders so genrating a set of decoders. """
+		super().__init__(name=InstrDecoder.__name__)
+		
+		""" To lazy to code 16 decoders so generating a set of decoders instead. """
 		self.decoders = []
 		for i in range(0, 16):
 			S3 = (i >> 3) & 0x01
@@ -210,90 +212,99 @@ class InstrDecoder(Part):
 			decoder = Decoder(*selectLines)
 			self.decoders.append(decoder)
 
-		super().__init__(numInputs=4, numOutputs=16,
-						 name="InstrDecoder",
-						 lines=["I3", "I2", "I1", "I0",
-						 		"NOPO", "LD", "LDC", "AND",
-								"ANDC", "OR", "ORC", "XNOR",
-								"STO", "STOC", "IEN", "OEN",
-								"JMP", "RTN", "SKZ", "NOPF"])
-	@property
-	def I3(self):
-		return self.decoders[0].I3
-	@property
-	def I2(self):
-		return self.decoders[0].I2
-	@property
-	def I1(self):
-		return self.decoders[0].I1
-	@property
-	def I0(self):
-		return self.decoders[0].I0
-	@I3.setter
-	def I3(self, value):
-		for decoder in self.decoders:
-			decoder.I3 = value
-	@I2.setter
-	def I2(self, value):
-		for decoder in self.decoders:
-			decoder.I2 = value
-	@I1.setter
-	def I1(self, value):
-		for decoder in self.decoders:
-			decoder.I1 = value
-	@I0.setter
-	def I0(self, value):
-		for decoder in self.decoders:
-			decoder.I0 = value
+		self.addInput(self.I3)
+		self.addInput(self.I2)
+		self.addInput(self.I1)
+		self.addInput(self.I0)
 
-	@property
-	def NOPO(self):
-		return self.decoders[0].Q
-	@property
-	def LD(self):
-		return self.decoders[1].Q
-	@property
-	def LDC(self):
-		return self.decoders[2].Q
-	@property
-	def AND(self):
-		return self.decoders[3].Q
-	@property
-	def ANDC(self):
-		return self.decoders[4].Q
-	@property
-	def OR(self):
-		return self.decoders[5].Q
-	@property
-	def ORC(self):
-		return self.decoders[6].Q
-	@property
-	def XNOR(self):
-		return self.decoders[7].Q
-	@property
-	def STO(self):
-		return self.decoders[8].Q
-	@property
-	def STOC(self):
-		return self.decoders[9].Q
-	@property
-	def IEN(self):
-		return self.decoders[10].Q
-	@property
-	def OEN(self):
-		return self.decoders[11].Q
-	@property
-	def JMP(self):
-		return self.decoders[12].Q
-	@property
-	def RTN(self):
-		return self.decoders[13].Q
-	@property
-	def SKZ(self):
-		return self.decoders[14].Q
-	@property
-	def NOPF(self):
-		return self.decoders[15].Q
+		self.addOutput(self.NOPO)
+		self.addOutput(self.LD)
+		self.addOutput(self.LDC)
+		self.addOutput(self.AND)
+
+		self.addOutput(self.ANDC)
+		self.addOutput(self.OR)
+		self.addOutput(self.ORC)
+		self.addOutput(self.XNOR)
+		
+		self.addOutput(self.STO)
+		self.addOutput(self.STOC)
+		self.addOutput(self.IEN)
+		self.addOutput(self.OEN)
+		
+		self.addOutput(self.JMP)
+		self.addOutput(self.RTN)
+		self.addOutput(self.SKZ)
+		self.addOutput(self.NOPF)
+	
+	def I3(self, *args):
+		for decoder in self.decoders:
+			decoder.I3(*args)
+		return self.decoders[0].I3(*args)
+	
+	def I2(self, *args):
+		for decoder in self.decoders:
+			decoder.I2(*args)
+		return self.decoders[0].I2(*args)
+	
+	def I1(self, *args):
+		for decoder in self.decoders:
+			decoder.I1(*args)
+		return self.decoders[0].I1(*args)
+	
+	def I0(self, *args):
+		for decoder in self.decoders:
+			decoder.I0(*args)
+		return self.decoders[0].I0(*args)
+
+
+	def NOPO(self, *args):
+		return self.decoders[0].Q(*args)
+
+	def LD(self, *args):
+		return self.decoders[1].Q(*args)
+
+	def LDC(self, *args):
+		return self.decoders[2].Q(*args)
+
+	def AND(self, *args):
+		return self.decoders[3].Q(*args)
+
+	def ANDC(self, *args):
+		return self.decoders[4].Q(*args)
+
+	def OR(self, *args):
+		return self.decoders[5].Q(*args)
+
+	def ORC(self, *args):
+		return self.decoders[6].Q(*args)
+
+	def XNOR(self, *args):
+		return self.decoders[7].Q(*args)
+
+	def STO(self, *args):
+		return self.decoders[8].Q(*args)
+
+	def STOC(self, *args):
+		return self.decoders[9].Q(*args)
+
+	def IEN(self, *args):
+		return self.decoders[10].Q(*args)
+
+	def OEN(self, *args):
+		return self.decoders[11].Q(*args)
+
+	def JMP(self, *args):
+		return self.decoders[12].Q(*args)
+
+	def RTN(self, *args):
+		return self.decoders[13].Q(*args)
+
+	def SKZ(self, *args):
+		return self.decoders[14].Q(*args)
+
+	def NOPF(self, *args):
+		return self.decoders[15].Q(*args)
 
 	def setInput(self, *args):
 		for decoder in self.decoders:
@@ -303,12 +314,10 @@ class InstrDecoder(Part):
 		for decoder in self.decoders:
 			decoder.process()
 
-	def __repr__(self):
-		states = [self.I3, self.I2, self.I1, self.I0] + [decoder.Q for decoder in self.decoders]
-		return self.buildTable(states)
-
 class Mux(Part):
 	def __init__(self):
+		super().__init__(name=Mux.__name__)
+		
 		self.andGate1 = And()
 		self.andGate2 = And()
 		self.andGate3 = And()
@@ -317,138 +326,110 @@ class Mux(Part):
 		self.notGate2 = Not()
 		self.orGate1 = Or()
 
-		super().__init__(numInputs=4, numOutputs=1,
-						 name="Mux",
-						 lines=["A", "B", "S0", "S1", "Q"])
-
-	@property
-	def A(self):
-		return self.andGate1.A
-	@A.setter
-	def A(self, value):
-		self.andGate1.A = value
-	@property
-	def B(self):
-		return self.andGate2.B
-	@B.setter
-	def B(self, value):
-		self.andGate2.B = value
-
-	@property
-	def S0(self):
-		return self.andGate1.B
-	@S0.setter
-	def S0(self, value):
-		self.andGate1.B = value
-	@property
-	def S1(self):
-		return self.andGate4.A
-	@S1.setter
-	def S1(self, value):
-		self.andGate4.A = value
-	@property
-	def Q(self):
-		return self.orGate1.Q
+		self.addInput(self.A)
+		self.addInput(self.B)
+		self.addInput(self.S0)
+		self.addInput(self.S1)
+		self.addOutput(self.Q)
+	
+	def A(self, *args):
+		return self.andGate1.A(*args)
+	
+	def B(self, *args):
+		return self.andGate2.B(*args)
+	
+	def S0(self, *args):
+		return self.andGate1.B(*args)
+	
+	def S1(self, *args):
+		return self.andGate4.A(*args)
+	
+	def Q(self, *args):
+		return self.orGate1.Q(*args)
 
 	def setInput(self, A, B, S0, S1):
-		self.A = A
-		self.B = B
-		self.S0 = S0
-		self.S1 = S1
+		self.A(A)
+		self.B(B)
+		self.S0(S0)
+		self.S1(S1)
 
 	def process(self):
-		self.notGate1.A = self.S1
-		self.notGate2.A = self.S0
+		self.notGate1.A(self.S1())
+		self.notGate2.A(self.S0())
 		self.notGate1.process()
 		self.notGate2.process()
 
 		self.andGate1.process()
-		self.andGate2.A = self.notGate2.Q
+		self.andGate2.A(self.notGate2.Q())
 		self.andGate2.process()
 
-		self.andGate3.A = self.andGate1.Q
-		self.andGate3.B = self.notGate1.Q
+		self.andGate3.A(self.andGate1.Q())
+		self.andGate3.B(self.notGate1.Q())
 		self.andGate3.process()
 
-		self.andGate4.B = self.andGate2.Q
+		self.andGate4.B(self.andGate2.Q())
 		self.andGate4.process()
 
-		self.orGate1.A = self.andGate3.Q
-		self.orGate1.B = self.andGate4.Q
+		self.orGate1.A(self.andGate3.Q())
+		self.orGate1.B(self.andGate4.Q())
 		self.orGate1.process()
-
-
-	def __repr__(self):
-		states = [self.A, self.B, self.S0, self.S1, self.Q]
-		return self.buildTable(states)
 
 class InstrRegister(Part):
 	def __init__(self):
-		self.registers = [DFlipFlop() for i in range(0, 4, 1)]
-		super().__init__(numInputs=5, numOutputs=4,
-						 name="Instruction Register",
-						 lines=["Clk", "I3", "I2", "I1", "I0", "Q3", "Q2", "Q1", "Q0"])
-	
-	@property
-	def Clk(self):
-		return self.registers[0].Clk
-	@Clk.setter
-	def Clk(self, value):
-		for register in self.registers:
-			register.Clk = value
+		super().__init__(name="Instruction Register")
+		
+		self.registers = [DFlipFlop() for i in range(4)]
 
-	@property
-	def I0(self):
-		return self.registers[0].Data
-	@I0.setter
-	def I0(self, value):
-		self.registers[0].Data = value
-	@property
-	def I1(self):
-		return self.registers[1].Data
-	@I1.setter
-	def I1(self, value):
-		self.registers[1].Data = value
-	@property
-	def I2(self):
-		return self.registers[2].Data
-	@I2.setter
-	def I2(self, value):
-		self.registers[2].Data = value
-	@property
-	def I3(self):
-		return self.registers[3].Data
-	@I3.setter
-	def I3(self, value):
-		self.registers[3].Data = value
+		self.addInput(self.Clk)
+		self.addInput(self.I3)
+		self.addInput(self.I2)
+		self.addInput(self.I1)
+		self.addInput(self.I0)
+		self.addOutput(self.Q3)
+		self.addOutput(self.Q2)
+		self.addOutput(self.Q1)
+		self.addOutput(self.Q0)
+
+	def Clk(self, *args):
+		for reg in self.registers:
+			reg.Clk(*args)
+
+		return self.registers[0].Clk(*args)
 	
-	@property
-	def Q0(self):
-		return self.registers[0].Q
-	@property
-	def Q1(self):
-		return self.registers[1].Q
-	@property
-	def Q2(self):
-		return self.registers[2].Q
-	@property
-	def Q3(self):
-		return self.registers[3].Q
+	def I0(self, *args):
+		return self.registers[0].Data(*args)
+	
+	def I1(self, *args):
+		return self.registers[1].Data(*args)
+	
+	def I2(self, *args):
+		return self.registers[2].Data(*args)
+	
+	def I3(self, *args):
+		return self.registers[3].Data(*args)
+	
+	def Q0(self, *args):
+		return self.registers[0].Q(*args)
+	
+	def Q1(self, *args):
+		return self.registers[1].Q(*args)
+	
+	def Q2(self, *args):
+		return self.registers[2].Q(*args)
+	
+	def Q3(self, *args):
+		return self.registers[3].Q(*args)
 
 	def setInput(self, Clk, I3, I2, I1, I0):
-		self.Clk = Clk
-		self.I0 = I0
-		self.I1 = I1
-		self.I2 = I2
-		self.I3 = I3
+		self.Clk(Clk)
+		self.I0(I0)
+		self.I1(I1)
+		self.I2(I2)
+		self.I3(I3)
 
 	def process(self):
 		for register in self.registers:
 			register.process()
-
-	def __repr__(self):
-		states = [self.Clk, self.I3, self.I2, self.I1, self.I0, self.Q3, self.Q2, self.Q1, self.Q0]
-		return self.buildTable(states)
 
 class DInRegister(Part):
 	def __init__(self):
