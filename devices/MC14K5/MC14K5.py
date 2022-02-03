@@ -137,6 +137,13 @@ class LogicUnit(Part):
 
 class Decoder(Part):
 	def __init__(self, lineEncoder3=Buffer(), lineEncoder2=Buffer(), lineEncoder1=Buffer(), lineEncoder0=Buffer()):
+		super().__init__(name=Decoder.__name__)
+		""" 
+			Arguments determine what value to decode.
+			Value consists of Buffers() and Not() Gates Not() represents a bit
+			and a Buffer() represents the complement of the bit in this specific Decoder.
+			so a value of 8 (1000) is: buffer(), Not(), Not(), Not() for arguments.
+		"""
 		self.lineEncoder0 = lineEncoder0
 		self.lineEncoder1 = lineEncoder1
 		self.lineEncoder2 = lineEncoder2
@@ -146,43 +153,32 @@ class Decoder(Part):
 		self.norGate2 = Nor()
 		self.andGate = And()
 
-		super().__init__(numInputs=4, numOutputs=1,
-						 name="Decoder",
-						 lines=["I3", "I2", "I1", "I0", "Q"])
-	@property
-	def I3(self):
-		return self.lineEncoder3.A
-	@I3.setter
-	def I3(self, value):
-		self.lineEncoder3.A = value
-	@property
-	def I2(self):
-		return self.lineEncoder2.A
-	@I2.setter
-	def I2(self, value):
-		self.lineEncoder2.A = value
-	@property
-	def I1(self):
-		return self.lineEncoder1.A
-	@I1.setter
-	def I1(self, value):
-		self.lineEncoder1.A = value
-	@property
-	def I0(self):
-		return self.lineEncoder0.A
-	@I0.setter
-	def I0(self, value):
-		self.lineEncoder0.A = value
-
-	@property
-	def Q(self):
-		return self.andGate.Q
+		self.addInput(self.I3)
+		self.addInput(self.I2)
+		self.addInput(self.I1)
+		self.addInput(self.I0)
+		self.addOutput(self.Q)
+	
+	def I3(self, *args):
+		return self.lineEncoder3.A(*args)
+	
+	def I2(self, *args):
+		return self.lineEncoder2.A(*args)
+	
+	def I1(self, *args):
+		return self.lineEncoder1.A(*args)
+	
+	def I0(self, *args):
+		return self.lineEncoder0.A(*args)
+	
+	def Q(self, *args):
+		return self.andGate.Q(*args)
 
 	def setInput(self, I3, I2, I1, I0):
-		self.I3 = I3
-		self.I2 = I2
-		self.I1 = I1
-		self.I0 = I0
+		self.I3(I3)
+		self.I2(I2)
+		self.I1(I1)
+		self.I0(I0)
 
 	def process(self):
 		self.lineEncoder0.process()
@@ -190,23 +186,20 @@ class Decoder(Part):
 		self.lineEncoder2.process()
 		self.lineEncoder3.process()
 
-		self.norGate1.A = self.lineEncoder0.Q
-		self.norGate1.B = self.lineEncoder1.Q
-		self.norGate2.A = self.lineEncoder2.Q
-		self.norGate2.B = self.lineEncoder3.Q
+		self.norGate1.A(self.lineEncoder0.Q())
+		self.norGate1.B(self.lineEncoder1.Q())
+		self.norGate2.A(self.lineEncoder2.Q())
+		self.norGate2.B(self.lineEncoder3.Q())
 		self.norGate1.process()
 		self.norGate2.process()
 
-		self.andGate.A = self.norGate1.Q
-		self.andGate.B = self.norGate2.Q
+		self.andGate.A(self.norGate1.Q())
+		self.andGate.B(self.norGate2.Q())
 		self.andGate.process()
-
-	def __repr__(self):
-		self.states = [self.I3, self.I2, self.I1, self.I0, self.Q]
-		return self.buildTable(self.states)
 
 class InstrDecoder(Part):
 	def __init__(self):
+		""" To lazy to code write 16 decoders so genrating a set of decoders. """
 		self.decoders = []
 		for i in range(0, 16):
 			S3 = (i >> 3) & 0x01

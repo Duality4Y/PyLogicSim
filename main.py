@@ -45,10 +45,10 @@ if __name__ == "__main__":
 	testPart(DeMux())
 
 	MC14K5.TestLU()
-	exit()
 
 	testPart(MC14K5.Decoder())
 	testPart(MC14K5.Mux())
+	exit()
 	testPart(MC14K5.InstrDecoder())
 	testPart(MC14K5.InstrRegister())
 	testFlipFlop(MC14K5.InstrRegister())
