@@ -43,11 +43,9 @@ if __name__ == "__main__":
 	testPart(Decoder())
 	TestMux(Mux())
 	testPart(DeMux())
-	exit()
-
 
 	MC14K5.TestLU()
-
+	exit()
 
 	testPart(MC14K5.Decoder())
 	testPart(MC14K5.Mux())
