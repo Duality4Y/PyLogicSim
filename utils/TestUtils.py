@@ -2,9 +2,9 @@ def numToBits(length, number):
 	return [(number >> (length - i - 1)) & 0x01 for i in range(0, length)]
 
 def clockPart(part):
-	part.Clk = 1
+	part.Clk(1)
 	part.process()
-	part.Clk = 0
+	part.Clk(0)
 	part.process()
 
 	part.printStates()

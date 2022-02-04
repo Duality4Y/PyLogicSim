@@ -433,161 +433,137 @@ class InstrRegister(Part):
 
 class DInRegister(Part):
 	def __init__(self):
+		super().__init__(name=DInRegister.__name__)
+
 		self.reg = DFlipFlop()
 		self.andGate = And()
 		self.notGate = Not()
-		super().__init__(numInputs=2, numOutputs=1,
-						 name="Data In Register",
-						 lines=["Clk", "Data", "<Qr>", "Q"])
-	@property
-	def Data(self):
-		return self.reg.Data
-	@Data.setter
-	def Data(self, value):
-		self.reg.Data = value
+		
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		self.addOutput(self.Qr)
+		self.addOutput(self.Q)
 	
-	@property
-	def Clk(self):
-		return self.notGate.A
-	@Clk.setter
-	def Clk(self, value):
-		self.notGate.A = value
+	def Clk(self, *args):
+		return self.notGate.A(*args)
+	
+	def Data(self, *args):
+		return self.reg.Data(*args)
 
-	@property
-	def Q(self):
-		return self.andGate.Q
-
+	def Q(self, *args):
+		return self.andGate.Q(*args)
+	
+	def Qr(self, *args):
+		return self.reg.Q(*args)
+	
+	def setInput(self, Clk, Data):
+		self.Clk(Clk)
+		self.Data(Data)
+	
 	def process(self):
 		self.notGate.process()
 
-		self.reg.Clk = self.notGate.Q
+		self.reg.Clk(self.notGate.Q())
 		self.reg.process()
 		
-		self.andGate.A = self.Data
-		self.andGate.B = self.reg.Q
+		self.andGate.A(self.Data())
+		self.andGate.B(self.reg.Q())
 		self.andGate.process()
-
-	def __repr__(self):
-		states = [self.Clk, self.Data, self.reg.Q, self.Q]
-		return self.buildTable(states)
 
 class DOutRegister(Part):
 	def __init__(self):
+		super().__init__(name=DOutRegister.__name__)
+
 		self.reg = DFlipFlop()
 		self.notGate = Not()
-		super().__init__(numInputs=2, numOutputs=1,
-						 name="Data Out Register",
-						 lines=["Data", "CLK", "Q"])
-	@property
-	def Data(self):
-		return self.reg.Data
-	@Data.setter
-	def Data(self, value):
-		self.reg.Data = value
+		
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		self.addOutput(self.Q)
 	
-	@property
-	def Clk(self):
-		return self.notGate.A
-	@Clk.setter
-	def Clk(self, value):
-		self.notGate.A = value
-
-	@property
-	def Q(self):
-		return self.reg.Q
-
-	@property
-	def Qn(self):
-		return self.reg.Qn
-
+	def Clk(self, *args):
+		return self.notGate.A(*args)
+	
+	def Data(self, *args):
+		return self.reg.Data(*args)
+	
+	def Q(self, *args):
+		return self.reg.Q(*args)
+	
+	def setInput(self, Clk, Data):
+		self.Clk(Clk)
+		self.Data(Data)
+	
 	def process(self):
 		self.notGate.process()
 
-		self.reg.Clk = self.notGate.Q
+		self.reg.Clk(self.notGate.Q())
 		self.reg.process()
-
-	def __repr__(self):
-		states = [self.Data, self.Clk, self.Q]
-		return self.buildTable(states)
 
 class FlagRegister(Part):
 	def __init__(self):
-		self.reg = DataLatch()
+		super().__init__(name=FlagRegister.__name__)
+		
+		self.reg = DFlipFlop()
 		self.notGate = Not()
-		super().__init__(numInputs=2, numOutputs=1,
-						 name="Flag Register",
-						 lines=["Data", "CLK", "Q"])
-	@property
-	def Data(self):
-		return self.reg.Data
-	@Data.setter
-	def Data(self, value):
-		self.reg.Data = value
+		
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		self.addOutput(self.Q)
 	
-	@property
-	def Clk(self):
-		return self.notGate.A
-	@Clk.setter
-	def Clk(self, value):
-		self.notGate.A = value
+	def Clk(self, *args):
+		return self.notGate.A(*args)
 
-	@property
-	def Q(self):
-		return self.reg.Q
-
-	@property
-	def Qn(self):
-		return self.reg.Qn
-
+	def Data(self, *args):
+		return self.reg.Data(*args)
+	
+	def Q(self, *args):
+		return self.reg.Q(*args)
+	
+	def setInput(self, Data, Clk):
+		self.Data(Data)
+		self.Clk(Clk)
+	
 	def process(self):
 		self.notGate.process()
 
-		self.reg.Clk = self.notGate.Q
+		self.reg.Clk(self.notGate.Q())
 		self.reg.process()
-
-	def __repr__(self):
-		states = [self.Data, self.Clk, self.Q]
-		return self.buildTable(states)
 
 class ResultRegister(Part):
 	def __init__(self):
+		super().__init__(name=ResultRegister.__name__)
+
 		self.reg = DFlipFlop()
 		self.andGate = And()
 		self.notGate = Not()
-		super().__init__(numInputs=2, numOutputs=1,
-						 name="ResultRegister",
-						 lines=["Clk", "Data", "Q", "Qn"])
-	@property
-	def Data(self):
-		return self.reg.Data
-	@Data.setter
-	def Data(self, value):
-		self.reg.Data = value
+
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		self.addOutput(self.Q)
+		self.addOutput(self.Qn)
+
+	def Data(self, *args):
+		return self.reg.Data(*args)
 	
-	@property
-	def Clk(self):
-		return self.notGate.A
-	@Clk.setter
-	def Clk(self, value):
-		self.notGate.A = value
-
-	@property
-	def Q(self):
-		return self.reg.Q
-
-	@property
-	def Qn(self):
-		return self.reg.Qn
+	def Clk(self, *args):
+		return self.notGate.A(*args)
+	
+	def Q(self, *args):
+		return self.reg.Q(*args)
+	
+	def Qn(self, *args):
+		return self.reg.Qn(*args)
+	
+	def setInput(self, Data, Clk):
+		self.Data(Data)
+		self.Clk(Clk)
 
 	def process(self):
 		self.notGate.process()
 
-		self.reg.Clk = self.notGate.Q
+		self.reg.Clk(self.notGate.Q())
 		self.reg.process()
-
-	def __repr__(self):
-		states = [self.Clk, self.Data, self.Q, self.Qn]
-		return self.buildTable(states)
 
 class ControlUnit(Part):
 	def __init__(self):
@@ -621,83 +597,77 @@ class ControlUnit(Part):
 					   name="MC14500 ControlUnit",
 					   lines=["Clk", "Data", "I3", "I2", "I1", "I0",
 					   		  "Write", "RR", "JMP", "RTN", "FLAG_O", "FLAG_F", "SKIP", "Reset"])
-	@property
-	def Clk(self):
-		return self.JmpLatch.Clk
-	@Clk.setter
-	def Clk(self, value):
+	
+		self.addInput(self.Clk)
+		self.addInput(self.Data)
+		# self.addInput(self.Reset)
+		self.addInput(self.I3)
+		self.addInput(self.I2)
+		self.addInput(self.I1)
+		self.addInput(self.I0)
+
+		self.addOutput(self.Write)
+		self.addOutput(self.RR)
+		self.addOutput(self.JMP)
+		self.addOutput(self.RTN)
+		self.addOutput(self.FLAG_O)
+		self.addOutput(self.FLAG_F)
+		self.addOutput(self.SKIP)
+	
+	def Clk(self, *args):
 		for clockedPart in self.clockedParts:
-			clockedPart.Clk = value
+			clockedPart.Clk(*args)
+		return self.clockedParts[0].Clk(*args)
+	
+	def Reset(self, *args):
+		for resetable in self.resetableParts:
+			resetable.Reset(*args)
+		return self.resettableParts[0].Reset(*args)
+	
+	def Data(self, *args):
+		self.DataInRegister.Data(*args)
+		return self.DataOutRegister.Data(*args)
+	
+	def I3(self, *args):
+		return self.InstrRegister.I3(*args)
 
-	@property
-	def Reset(self):
-		return 1
-	@Reset.setter
-	def Reset(self, value):
-		for resetablePart in self.resetableParts:
-			resetablePart.Reset = value
+	def I2(self, *args):
+		return self.InstrRegister.I2(*args)
 
-	@property
-	def Data(self):
-		return self.DataInRegister.Data
-	@Data.setter
-	def Data(self, value):
-		self.DataInRegister.Data = value
-		self.DataOutRegister.Data = value
-	@property
-	def I3(self):
-		return self.InstrRegister.I3
-	@I3.setter
-	def I3(self, value):
-		self.InstrRegister.I3 = value
-	@property
-	def I2(self):
-		return self.InstrRegister.I2
-	@I2.setter
-	def I2(self, value):
-		self.InstrRegister.I2 = value
-	@property
-	def I1(self):
-		return self.InstrRegister.I1
-	@I1.setter
-	def I1(self, value):
-		self.InstrRegister.I1 = value
-	@property
-	def I0(self):
-		return self.InstrRegister.I0
-	@I0.setter
-	def I0(self, value):
-		self.InstrRegister.I0 = value
+	def I1(self, *args):
+		return self.InstrRegister.I1(*args)
 
-	@property
-	def Write(self):
-		return self.andGate1.Q
-	@property
-	def RR(self):
-		return self.notGate1.Q
-	@property
-	def JMP(self):
-		return self.JmpLatch.Q
-	@property
-	def RTN(self):
-		return self.RtnLatch.Q
-	@property
-	def FLAG_O(self):
-		return self.FlagOLatch.Q
-	@property
-	def FLAG_F(self):
-		return self.FlagFLatch.Q
-	@property
-	def SKIP(self):
-		return self.SkipLatch.Q
+	def I0(self, *args):
+		return self.InstrRegister.I0(*args)
+
+	def Write(self, *args):
+		return self.andGate1.Q(*args)
+
+	def RR(self, *args):
+		return self.notGate1.Q(*args)
+
+	def JMP(self, *args):
+		return self.JmpLatch.Q(*args)
+
+	def RTN(self, *args):
+		return self.RtnLatch.Q(*args)
+
+	def FLAG_O(self, *args):
+		return self.FlagOLatch.Q(*args)
+
+	def FLAG_F(self, *args):
+		return self.FlagFLatch.Q(*args)
+
+	def SKIP(self, *args):
+		return self.SkipLatch.Q(*args)
 
 	def setInput(self, Clk, Data, I3, I2, I1, I0):
-		self.Clk = Clk
-		self.Data = Data
-		self.I3 = I3
-		self.I2 = I2
-		self.I1 = I1
-		self.I0 = I0
+		self.Clk(Clk)
+		self.Data(Data)
+		self.I3(I3)
+		self.I2(I2)
+		self.I1(I1)
+		self.I0(I0)
 
 	def debugPrint(self, part):
 		print("part: {0}".format(part.name))
@@ -721,65 +691,58 @@ class ControlUnit(Part):
 	def process(self):
 		self.InstrRegister.process()
 
-		self.instrDecoder.I3 = self.InstrRegister.Q3
-		self.instrDecoder.I2 = self.InstrRegister.Q2
-		self.instrDecoder.I1 = self.InstrRegister.Q1
-		self.instrDecoder.I0 = self.InstrRegister.Q0
+		self.instrDecoder.I3(self.InstrRegister.Q3())
+		self.instrDecoder.I2(self.InstrRegister.Q2())
+		self.instrDecoder.I1(self.InstrRegister.Q1())
+		self.instrDecoder.I0(self.InstrRegister.Q0())
 		self.instrDecoder.process()
 
-		self.DataInRegister.Clk = self.instrDecoder.IEN
+		self.DataInRegister.Clk(self.instrDecoder.IEN())
 		self.DataInRegister.process()
 
-		self.logicUnit.Data = self.DataInRegister.Q
-		self.logicUnit.RIn = self.ResultRegister.Q
-		self.logicUnit.LD_OR = self.instrDecoder.LD | self.instrDecoder.OR
-		self.logicUnit.LDC_ORC = self.instrDecoder.LDC | self.instrDecoder.ORC
-		self.logicUnit.AND_XNOR = self.instrDecoder.AND | self.instrDecoder.XNOR
-		self.logicUnit.ANDC = self.instrDecoder.ANDC
-		self.logicUnit.OR_ORC = self.instrDecoder.OR | self.instrDecoder.ORC
-		self.logicUnit.XNOR = self.instrDecoder.XNOR
+		self.logicUnit.Data(self.DataInRegister.Q())
+		self.logicUnit.RIn(self.ResultRegister.Q())
+		self.logicUnit.LD_OR(self.instrDecoder.LD() | self.instrDecoder.OR())
+		self.logicUnit.LDC_ORC(self.instrDecoder.LDC() | self.instrDecoder.ORC())
+		self.logicUnit.AND_XNOR(self.instrDecoder.AND() | self.instrDecoder.XNOR())
+		self.logicUnit.ANDC(self.instrDecoder.ANDC())
+		self.logicUnit.OR_ORC(self.instrDecoder.OR() | self.instrDecoder.ORC())
+		self.logicUnit.XNOR(self.instrDecoder.XNOR())
 		self.logicUnit.process()
 
-		self.FlagOLatch.Data = self.instrDecoder.NOPO
+		self.FlagOLatch.Data(self.instrDecoder.NOPO())
 		self.FlagOLatch.process()
-		self.FlagFLatch.Data = self.instrDecoder.NOPF
+		self.FlagFLatch.Data(self.instrDecoder.NOPF())
 		self.FlagFLatch.process()
-		self.SkipLatch.Data = self.instrDecoder.SKZ
+		self.SkipLatch.Data(self.instrDecoder.SKZ())
 		self.SkipLatch.process()
-		self.RtnLatch.Data = self.instrDecoder.RTN
+		self.RtnLatch.Data(self.instrDecoder.RTN())
 		self.RtnLatch.process()
-		self.JmpLatch.Data = self.instrDecoder.JMP
+		self.JmpLatch.Data(self.instrDecoder.JMP())
 		self.JmpLatch.process()
 
-		self.ResultRegister.Data = self.logicUnit.ROut
+		self.ResultRegister.Data(self.logicUnit.ROut())
 		self.ResultRegister.process()
 
-		self.notGate1.A = self.ResultRegister.Qn
+		self.notGate1.A(self.ResultRegister.Qn())
 		self.notGate1.process()
 
-		self.mux.A = self.ResultRegister.Q
-		self.mux.B = self.ResultRegister.Qn
-		self.mux.S0 = self.instrDecoder.STO
-		self.mux.S1 = self.instrDecoder.STOC
+		self.mux.A(self.ResultRegister.Q())
+		self.mux.B(self.ResultRegister.Qn())
+		self.mux.S0(self.instrDecoder.STO())
+		self.mux.S1(self.instrDecoder.STOC())
 		self.mux.process()
 
-		self.DataOutRegister.Data = self.mux.Q | self.Data
-		self.DataOutRegister.Clk = self.instrDecoder.OEN
+		self.DataOutRegister.Data(self.mux.Q() | self.Data())
+		self.DataOutRegister.Clk(self.instrDecoder.OEN())
 		self.DataOutRegister.process()
 
-		self.andGate1.A = self.DataOutRegister.Q
-		self.orGate1.A = self.instrDecoder.STO
-		self.orGate1.B = self.instrDecoder.STOC
+		self.andGate1.A(self.DataOutRegister.Q())
+		self.orGate1.A(self.instrDecoder.STO())
+		self.orGate1.B(self.instrDecoder.STOC())
 		self.orGate1.process()
-		self.andGate1.B = self.orGate1.Q
+		self.andGate1.B(self.orGate1.Q())
 		self.andGate1.process()
-
-
-	def __repr__(self):
-		states = [self.Clk, self.Data, self.I3, self.I2, self.I1, self.I0,
-				  self.Write, self.RR, self.JMP, self.RTN, self.FLAG_O, self.FLAG_F, self.SKIP, self.Reset]
-		return self.buildTable(states)
-
 
 def TestLU():
 	inputTable = [("LD",   [1, 0, 0, 0, 0, 0]), # LD
