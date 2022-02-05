@@ -28,8 +28,11 @@ class Widget(object):
 		self.paddingSize = 2
 
 		self.borderColor = (0x80, 0x80, 0x80)
+		self.borderBgColor = (0x00, 0x00, 0x00)
 		self.borderFill = 2
 		self.cornerRatio = 24
+
+		self.bgColor = (0x10, 0x28, 0x50)
 
 		self.behaviour = kwargs.get("behaviour", Widget.EXPAND)
 
@@ -111,12 +114,21 @@ class Widget(object):
 	# 	surface.fill(color)
 	# 	surface.set_alpha(alpha)
 	# 	return surface, getAreaPosition(area)
-
+	""" Draws a debug layout in contrasting colors."""
 	def drawLayout(self, surface):
 		pygame.draw.rect(surface, GREEN, self.marginArea, 0)
 		pygame.draw.rect(surface, MAGENTA, self.borderArea, 0)
 		pygame.draw.rect(surface, CYAN, self.paddingArea, 0)
 		pygame.draw.rect(surface, YELLOW, self.contentArea, 0)
+
+	""" This function allows for drawing a background. """
+	def drawBackground(self, surface):
+		bgSurface = pygame.Surface(getAreaSize(self.contentArea))
+		bgSurface.fill(self.bgColor)
+		bgSurface.set_alpha(0x80)
+		pygame.draw.rect(surface, (0, 0, 0), self.area, 0)
+		# pygame.draw.rect(surface, self.bgColor, self.contentArea, 0)
+		surface.blit(bgSurface, getAreaPosition(self.contentArea))
 
 	""" This function allows for drawing of the border """
 	def drawBorder(self, surface):
@@ -128,6 +140,8 @@ class Widget(object):
 	
 	""" This function draws the widget """
 	def draw(self, surface):
+		""" Draw the background first. """
+		self.drawBackground(surface)
 		""" if enabled draws the layout for debugging purposes. """
 		if DebugDraw:
 			self.drawLayout(surface)

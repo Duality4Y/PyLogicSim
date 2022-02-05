@@ -45,7 +45,7 @@ class Button(Label):
 		if(self.borderVisible):
 			x, y, width, height = self.borderArea
 			smallest = min(width, height)
-			
+
 			borderColor = self.borderColor
 			if self.mouseHover:
 				borderColor = self.hoverColor
@@ -76,7 +76,7 @@ class Button(Label):
 				if self.pressedCallback:
 					self.pressedCallback(self)
 			if self.isReleased():
-				self.debugPrintParents()
+				# self.debugPrintParents()
 				if self.releasedCallback:
 					self.releasedCallback(self)
 		""" update button state when mouse not on it but still releases button """
@@ -110,5 +110,7 @@ class CheckButton(Button):
 		super().processEvents()
 		if self.prevMarked != self.marked:
 			if self.checkCallback:
-				self.checkCallback(self)
+				# self.checkCallback(self)
+				func, args = self.checkCallback
+				func(self, args)
 		self.prevMarked = self.marked

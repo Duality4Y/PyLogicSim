@@ -11,14 +11,12 @@ from utils.TestUtils import numToBits, clockPart
 
 from devices.MC14K5 import MC14K5
 
-# from interface.ui import TestApp
+from interface.ui import TestApp
 
 if __name__ == "__main__":
-	print("Hello, world!")
-
-	# app = TestApp()
-	# app.run()
-	# exit()
+	app = TestApp()
+	app.run()
+	exit()
 
 	testPart(And())
 	testPart(Or())
@@ -67,7 +65,6 @@ if __name__ == "__main__":
 	clockPart(control)
 	control.setInput(0, 1, *numToBits(4, instr.STO))
 	clockPart(control)
-	exit()
 	print("-> LD(0) and STO(0) test.")
 	control.setInput(0, 0, *numToBits(4, instr.LD))
 	clockPart(control)
