@@ -1,4 +1,6 @@
-== Device to Make: ==
+# Todo and Ideas list
+
+## Device to Make:
 MC14500
 UE14500
 sap variants
@@ -8,7 +10,7 @@ nandtris
 Intel4004
 6502
 
-== Gui Ideas ==
+## Gui Ideas
 * a Logic analyzer display outputs in a graph kind of thing
 * Instruction Input Box
 * Memory view
