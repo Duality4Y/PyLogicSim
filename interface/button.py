@@ -74,11 +74,13 @@ class Button(Label):
 			if self.isPressed():
 				self.isHeld = True
 				if self.pressedCallback:
-					self.pressedCallback(self)
+					func, arg = self.pressedCallback
+					func(self, arg)
 			if self.isReleased():
 				# self.debugPrintParents()
 				if self.releasedCallback:
-					self.releasedCallback(self)
+					func, arg = self.releasedCallback
+					func(self, arg)
 		""" update button state when mouse not on it but still releases button """
 		if self.isReleased():
 			self.isHeld = False
@@ -91,9 +93,13 @@ class CheckButton(Button):
 		self.prevMarked = False
 
 		self.checkCallback = None
-		self.releasedCallback = self.toggleMarked
+		self.releasedCallback = self.toggleMarked, None
+	
+	def unCheck(self):
+		self.marked = False
+		self.prevMarked = False
 
-	def toggleMarked(self, widget):
+	def toggleMarked(self, widget, args):
 		self.marked = not self.marked
 
 	def drawContent(self, surface):

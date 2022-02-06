@@ -380,6 +380,8 @@ class InstrRegister(Part):
 		
 		self.registers = [DFlipFlop() for i in range(4)]
 
+		self.notgate = Not()
+
 		self.addInput(self.Clk)
 		self.addInput(self.I3)
 		self.addInput(self.I2)
@@ -391,10 +393,10 @@ class InstrRegister(Part):
 		self.addOutput(self.Q0)
 
 	def Clk(self, *args):
-		for reg in self.registers:
-			reg.Clk(*args)
-
-		return self.registers[0].Clk(*args)
+		# for reg in self.registers:
+		# 	reg.Clk(*args)
+		# return self.registers[0].Clk(*args)
+		return self.notgate.A(*args)
 	
 	def I0(self, *args):
 		return self.registers[0].Data(*args)
@@ -428,7 +430,9 @@ class InstrRegister(Part):
 		self.I3(I3)
 
 	def process(self):
+		self.notgate.process()
 		for register in self.registers:
+			register.Clk(self.notgate.Q())
 			register.process()
 
 class DInRegister(Part):
@@ -536,12 +540,18 @@ class ResultRegister(Part):
 
 		self.reg = DFlipFlop()
 		self.andGate = And()
-		self.notGate = Not()
+		self.notGate = Buffer()
 
 		self.addInput(self.Clk)
 		self.addInput(self.Data)
 		self.addOutput(self.Q)
 		self.addOutput(self.Qn)
+
+		self.reg.Data(0)
+		self.Clk(1)
+		self.process()
+		self.Clk(0)
+		self.process()
 
 	def Data(self, *args):
 		return self.reg.Data(*args)

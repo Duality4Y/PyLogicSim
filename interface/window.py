@@ -1,10 +1,10 @@
 import os
 import sys
+import time
 
 import pygame
 
 from interface.container import Container
-
 from interface.colorDefs import *
 
 pygame.init()
@@ -62,4 +62,5 @@ class App(Container):
 				widget.processEvents()
 				widget.draw(screen)
 			pygame.display.flip()
+			time.sleep(0.033)
 		self.quitApplication()

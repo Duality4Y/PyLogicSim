@@ -52,7 +52,30 @@ class Indicator(CheckButton):
 
 
 from basicparts.Gates import Nand, Not, Buffer
-from devices.MC14K5.MC14K5 import Decoder, LogicUnit, ControlUnit
+from devices.MC14K5.MC14K5 import ControlUnit
+from devices.MC14K5.MC14K5 import Instructions
+from utils.TestUtils import numToBits
+
+class InstrSelectBox(Box):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs, type=Box.HORIZONTAL)
+		self.part = kwargs.get("part")
+
+		self.instructions = Instructions()
+		instrNames = [attr for attr in dir(self.instructions) if not callable(getattr(self.instructions, attr)) and not attr.startswith("__")]
+		self.instrInputs = (self.part.I3, self.part.I2, self.part.I1, self.part.I0)
+		
+		self.prevCheckedButton = None
+
+		for instrName in instrNames:
+			checkButton = Button(text=instrName)
+			checkButton.releasedCallback = (self.setInstruction, getattr(self.instructions, instrName))
+			self.addWidget(checkButton)
+	
+	def setInstruction(self, w, instrValue):
+		instrBits = numToBits(4, instrValue)
+		for value, input in zip(instrBits, self.instrInputs):
+			input(value)
 
 class PartControlBox(Box):
 	def __init__(self, *args, **kwargs):
@@ -147,12 +170,13 @@ class MC14K5Widget(Box):
 		self.subPartBox = Box(type=Box.VERTICAL)
 
 		self.partBox.addWidget(PartControlBox(part=self.part))
+		self.partBox.addWidget(InstrSelectBox(part=self.part))
 		self.partBox.addWidget(Box())
 		
 		self.addWidget(self.partBox)
 		self.addWidget(self.subPartBox)
 
-		self.addWidget(Box())
+		# self.addWidget(Box())
 		
 		rowBox = Box(type=Box.HORIZONTAL)
 		rowBox.addWidget(PartDisplayBox(part=self.part.JmpLatch, title="JmpLatch"))
