@@ -1,7 +1,7 @@
 from basicparts.Part import Part
 from basicparts.Gates import Not, And, Or, Nor, Buffer
 from basicparts.FlipFlop import DFlipFlop
-from basicparts.Latch import DataLatch
+from basicparts.Latch import DataLatch, GatedLatch
 
 class Instructions(object):
 	def __init__(self):
@@ -504,7 +504,7 @@ class FlagRegister(Part):
 	def __init__(self):
 		super().__init__(name=FlagRegister.__name__)
 		
-		self.reg = DFlipFlop()
+		self.reg = DataLatch()
 		self.notGate = Not()
 		
 		self.addInput(self.Clk)
@@ -685,7 +685,7 @@ class ControlUnit(Part):
 		self.debugPrint(self.DataOutRegister)
 		self.debugPrint(self.orGate1)
 		self.debugPrint(self.andGate1)
-		# self.debugPrint(self.FlagOLatch)
+		self.debugPrint(self.FlagOLatch)
 		print('\n' * 3)
 
 	def process(self):

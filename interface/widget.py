@@ -31,6 +31,9 @@ class Widget(object):
 		self.borderBgColor = (0x00, 0x00, 0x00)
 		self.borderFill = 2
 		self.cornerRatio = 24
+		self.borderVisible = True
+
+		self.visible = True
 
 		self.bgColor = (0x10, 0x28, 0x50)
 
@@ -140,6 +143,8 @@ class Widget(object):
 	
 	""" This function draws the widget """
 	def draw(self, surface):
+		if not self.visible:
+			return
 		""" Draw the background first. """
 		self.drawBackground(surface)
 		""" if enabled draws the layout for debugging purposes. """
@@ -148,7 +153,8 @@ class Widget(object):
 		""" draw the widget contents"""
 		self.drawContent(surface)
 		""" draw a basic border to indicate widget location and size """
-		self.drawBorder(surface)
+		if self.borderVisible:
+			self.drawBorder(surface)
 	
 	""" this function sets the internal state based on outside events."""
 	def handleEvents(self, event):

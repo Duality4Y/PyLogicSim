@@ -99,10 +99,9 @@ class CheckButton(Button):
 	def drawContent(self, surface):
 		""" fill in the button if button is set. """
 		if(self.marked):
-			if(self.borderVisible):
-				x, y, width, height = self.contentArea
-				smallest = min(width, height)
-				pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / self.cornerRatio))
+			x, y, width, height = self.contentArea
+			smallest = min(width, height)
+			pygame.draw.rect(surface, self.selectedColor, self.contentArea, 0, round(smallest / self.cornerRatio))
 		""" Draw the normal border to indicate it's a button. """
 		super().drawContent(surface)
 

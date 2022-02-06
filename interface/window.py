@@ -13,7 +13,7 @@ pygame.font.init()
 moduleFilePath = os.path.abspath(sys.modules['__main__'].__file__)
 projectRoot = os.path.dirname(moduleFilePath)
 
-screenSize = screenWidth, screenHeight = 800, 600
+screenSize = screenWidth, screenHeight = 2560, 1350
 screen = pygame.display.set_mode(screenSize)
 
 fontName = "Roboto-Regular.ttf"

@@ -14,6 +14,14 @@ from interface.container import Container
 from interface.alignment import Alignment
 from interface.container import PackedBox
 
+from interface.colorDefs import *
+
+class Padding(Widget):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.visible = False
+	
+
 class Indicator(CheckButton):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -44,9 +52,9 @@ class Indicator(CheckButton):
 
 
 from basicparts.Gates import Nand, Not, Buffer
-from devices.MC14K5.MC14K5 import Decoder, LogicUnit
+from devices.MC14K5.MC14K5 import Decoder, LogicUnit, ControlUnit
 
-class PartBox(Box):
+class PartControlBox(Box):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs, type=Box.VERTICAL)
 		self.part = kwargs.get("part", Nand())
@@ -83,6 +91,7 @@ class PartBox(Box):
 	def controlInput(self, widget, input):
 		value = 1 if widget.marked else 0
 		input(value)
+
 	"""
 		Do general Event Processing but also Process part.
 		Essentially calling part.process() allows the part to update it's internal
@@ -93,9 +102,81 @@ class PartBox(Box):
 		super().processEvents()
 		self.part.process()
 
+class PartDisplayBox(Box):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs, type=Box.VERTICAL)
+		self.part = kwargs.get("part", Nand())
+		self.title = kwargs.get("title", "None")
+
+		self.titleLabel = Label(text=self.title)
+		self.inputBox = Box(type=Box.HORIZONTAL)
+		self.outputBox = Box(type=Box.HORIZONTAL)
+		self.addWidget(self.titleLabel)
+		self.addWidget(self.inputBox)
+		self.addWidget(self.outputBox)
+
+		self.titleLabel.borderVisible = False
+		self.inputBox.borderVisible = False
+		self.outputBox.borderVisible = False
+
+		self.borderColor = (0x80, 0, 0x80)
+		
+		for input in self.part.inputs:
+			indicator = Indicator(text=input.__name__)
+			indicator.watch(input)
+			indicator.borderVisible = False
+			self.inputBox.addWidget(indicator)
+
+		for output in self.part.outputs:
+			indicator = Indicator(text=output.__name__)
+			indicator.watch(output)
+			indicator.borderVisible = False
+			self.outputBox.addWidget(indicator)
+		
+	def processEvents(self):
+		super().processEvents()
+		self.part.process()
+		
+
+class MC14K5Widget(Box):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs, type=Box.HORIZONTAL)
+		self.part = ControlUnit()
+
+		self.partBox = Box(type=Box.VERTICAL)
+		self.subPartBox = Box(type=Box.VERTICAL)
+
+		self.partBox.addWidget(PartControlBox(part=self.part))
+		self.partBox.addWidget(Box())
+		
+		self.addWidget(self.partBox)
+		self.addWidget(self.subPartBox)
+
+		self.addWidget(Box())
+		
+		rowBox = Box(type=Box.HORIZONTAL)
+		rowBox.addWidget(PartDisplayBox(part=self.part.JmpLatch, title="JmpLatch"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.RtnLatch, title="RtnLatch"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.FlagOLatch, title="FlagOLatch"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.FlagFLatch, title="FlagFLatch"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.SkipLatch, title="SkipLatch"))
+		self.subPartBox.addWidget(rowBox)
+
+		rowBox = Box(type=Box.HORIZONTAL)
+		rowBox.addWidget(PartDisplayBox(part=self.part.DataInRegister, title="DataInRegister"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.DataOutRegister, title="DataOutRegister"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.ResultRegister, title="ResultRegister"))
+		rowBox.addWidget(PartDisplayBox(part=self.part.mux, title="mux"))
+		self.subPartBox.addWidget(rowBox)
+
+		self.subPartBox.addWidget(PartDisplayBox(part=self.part.InstrRegister, title="InstrRegister"))
+		self.subPartBox.addWidget(PartDisplayBox(part=self.part.instrDecoder, title="instrDecoder"))
+		self.subPartBox.addWidget(PartDisplayBox(part=self.part.logicUnit, title="logicUnit"))
+		
 
 class TestApp(App):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-		self.addWidget(PartBox(part=LogicUnit()))
+		# self.addWidget(PartBox(part=ControlUnit()))
+		self.addWidget(MC14K5Widget())
