@@ -509,14 +509,13 @@ class FlagRegister(Part):
 		super().__init__(name=FlagRegister.__name__)
 		
 		self.reg = DataLatch()
-		self.notGate = Not()
 		
 		self.addInput(self.Clk)
 		self.addInput(self.Data)
 		self.addOutput(self.Q)
 	
 	def Clk(self, *args):
-		return self.notGate.A(*args)
+		return self.reg.Clk(*args)
 
 	def Data(self, *args):
 		return self.reg.Data(*args)
@@ -529,16 +528,13 @@ class FlagRegister(Part):
 		self.Clk(Clk)
 	
 	def process(self):
-		self.notGate.process()
-
-		self.reg.Clk(self.notGate.Q())
 		self.reg.process()
 
 class ResultRegister(Part):
 	def __init__(self):
 		super().__init__(name=ResultRegister.__name__)
 
-		self.reg = DFlipFlop()
+		self.reg = DataLatch()
 		self.andGate = And()
 		self.notGate = Buffer()
 
@@ -622,7 +618,6 @@ class ControlUnit(Part):
 		self.addOutput(self.RTN)
 		self.addOutput(self.FLAG_O)
 		self.addOutput(self.FLAG_F)
-		self.addOutput(self.SKIP)
 	
 	def Clk(self, *args):
 		for clockedPart in self.clockedParts:
