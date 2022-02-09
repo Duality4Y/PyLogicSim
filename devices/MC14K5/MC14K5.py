@@ -534,9 +534,8 @@ class ResultRegister(Part):
 	def __init__(self):
 		super().__init__(name=ResultRegister.__name__)
 
-		self.reg = DataLatch()
+		self.reg = DFlipFlop()
 		self.andGate = And()
-		self.notGate = Buffer()
 
 		self.addInput(self.Clk)
 		self.addInput(self.Data)
@@ -553,7 +552,7 @@ class ResultRegister(Part):
 		return self.reg.Data(*args)
 	
 	def Clk(self, *args):
-		return self.notGate.A(*args)
+		return self.reg.Clk(*args)
 	
 	def Q(self, *args):
 		return self.reg.Q(*args)
@@ -566,14 +565,13 @@ class ResultRegister(Part):
 		self.Clk(Clk)
 
 	def process(self):
-		self.notGate.process()
-
-		self.reg.Clk(self.notGate.Q())
+		self.reg.Clk()
 		self.reg.process()
 
 class ControlUnit(Part):
 	def __init__(self):
 		self.andGate1 = And()
+		self.andGate2 = And()
 		self.orGate1 = Or()
 		self.notGate1 = Not()
 		
@@ -705,13 +703,17 @@ class ControlUnit(Part):
 		self.DataInRegister.Clk(self.instrDecoder.IEN())
 		self.DataInRegister.process()
 
-		self.ResultRegister.Clk(self.instrDecoder.LD() 	|
-								self.instrDecoder.LDC() |
-								self.instrDecoder.AND()	|
-								self.instrDecoder.ANDC()|
-								self.instrDecoder.OR()	|
-								self.instrDecoder.ORC()	|
-								self.instrDecoder.XNOR())
+		self.andGate2.A(self.Clk())
+		self.andGate2.B(self.instrDecoder.LD() 	|
+						self.instrDecoder.LDC() |
+						self.instrDecoder.AND()	|
+						self.instrDecoder.ANDC()|
+						self.instrDecoder.OR()	|
+						self.instrDecoder.ORC()	|
+						self.instrDecoder.XNOR())
+		self.andGate2.process()
+
+		self.ResultRegister.Clk(self.andGate2.Q())
 								
 		self.ResultRegister.process()
 
