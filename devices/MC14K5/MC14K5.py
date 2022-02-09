@@ -593,7 +593,7 @@ class ControlUnit(Part):
 		self.mux = Mux()
 
 		self.clockedParts = [self.JmpLatch, self.RtnLatch, self.FlagOLatch, self.FlagFLatch, self.SkipLatch,
-							 self.ResultRegister, self.InstrRegister]
+							 self.InstrRegister]
 
 		self.resetableParts = [self.JmpLatch, self.RtnLatch, self.FlagOLatch, self.FlagFLatch,
 							   self.SkipLatch, self.DataInRegister, self.DataOutRegister,
@@ -704,6 +704,16 @@ class ControlUnit(Part):
 
 		self.DataInRegister.Clk(self.instrDecoder.IEN())
 		self.DataInRegister.process()
+
+		self.ResultRegister.Clk(self.instrDecoder.LD() 	|
+								self.instrDecoder.LDC() |
+								self.instrDecoder.AND()	|
+								self.instrDecoder.ANDC()|
+								self.instrDecoder.OR()	|
+								self.instrDecoder.ORC()	|
+								self.instrDecoder.XNOR())
+								
+		self.ResultRegister.process()
 
 		self.logicUnit.Data(self.DataInRegister.Q())
 		self.logicUnit.RIn(self.ResultRegister.Q())
