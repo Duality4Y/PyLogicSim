@@ -143,15 +143,24 @@ class PartDisplayBox(Box):
 		self.outputBox.borderVisible = False
 
 		self.borderColor = (0x80, 0, 0x80)
+		self.outputColor = (0x00, 0x70, 0x00)
+		self.inputColor = (0x11, 0x8A, 0x11)
+		self.clkColor = (0x00, 0x1F, 0x65)
 		
 		for input in self.part.inputs:
 			indicator = Indicator(text=input.__name__)
+			print(input.__name__)
+			if input.__name__ == "Clk":
+				indicator.selectedColor = self.clkColor
+			else:
+				indicator.selectedColor = self.inputColor
 			indicator.watch(input)
 			indicator.borderVisible = False
 			self.inputBox.addWidget(indicator)
 
 		for output in self.part.outputs:
 			indicator = Indicator(text=output.__name__)
+			indicator.selectedColor = self.outputColor
 			indicator.watch(output)
 			indicator.borderVisible = False
 			self.outputBox.addWidget(indicator)
@@ -169,13 +178,13 @@ class MC14K5Widget(Box):
 		self.partBox = Box(type=Box.VERTICAL)
 		self.subPartBox = Box(type=Box.VERTICAL)
 
-		self.partBox.addWidget(PartControlBox(part=self.part))
-		self.partBox.addWidget(InstrSelectBox(part=self.part))
+		partControlBox = PartControlBox(part=self.part)
+		partControlBox.addWidget(InstrSelectBox(part=self.part))
+		self.partBox.addWidget(partControlBox)
 		self.partBox.addWidget(Box())
 		
 		self.addWidget(self.partBox)
 		self.addWidget(self.subPartBox)
-
 		# self.addWidget(Box())
 		
 		rowBox = Box(type=Box.HORIZONTAL)
