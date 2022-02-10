@@ -149,7 +149,6 @@ class PartDisplayBox(Box):
 		
 		for input in self.part.inputs:
 			indicator = Indicator(text=input.__name__)
-			print(input.__name__)
 			if input.__name__ == "Clk":
 				indicator.selectedColor = self.clkColor
 			else:

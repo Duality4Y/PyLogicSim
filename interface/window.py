@@ -46,6 +46,7 @@ class App(Container):
 		while self.Running:
 			""" handle all the events. """
 			for event in pygame.event.get():
+				self.handleEvents(event)
 				for widget in self.widgets:
 					widget.handleEvents(event)
 				""" Exit on pressing escape. """
