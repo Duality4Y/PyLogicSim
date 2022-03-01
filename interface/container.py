@@ -9,6 +9,8 @@ class Container(Widget):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.widgets = []
+		self.paddingSize = 0
+		self.marginSize = 0
 
 	def addWidget(self, widget):
 		widget.setParent(self)

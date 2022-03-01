@@ -572,6 +572,7 @@ class ControlUnit(Part):
 	def __init__(self):
 		self.andGate1 = And()
 		self.andGate2 = And()
+		self.andGate3 = And()
 		self.orGate1 = Or()
 		self.notGate1 = Not()
 		
@@ -644,7 +645,7 @@ class ControlUnit(Part):
 		return self.InstrRegister.I0(*args)
 
 	def Write(self, *args):
-		return self.andGate1.Q(*args)
+		return self.andGate3.Q(*args)
 
 	def RR(self, *args):
 		return self.notGate1.Q(*args)
@@ -760,6 +761,11 @@ class ControlUnit(Part):
 		self.orGate1.process()
 		self.andGate1.B(self.orGate1.Q())
 		self.andGate1.process()
+
+		# Write output is gated with the clock to only be on if the clock is high.
+		self.andGate3.A(self.andGate1.Q())
+		self.andGate3.B(self.Clk())
+		self.andGate3.process()
 
 def TestLU():
 	inputTable = [("LD",   [1, 0, 0, 0, 0, 0]), # LD
