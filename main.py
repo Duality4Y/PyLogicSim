@@ -13,6 +13,71 @@ from devices.MC14K5 import MC14K5
 
 from interface.ui import TestApp
 
+"""
+	inputs: Clk
+	outputs: Q0 ... Q3
+"""
+class NibleCounter(Part):
+	def __init__(self, *args, **kwargs):
+		super().__init__(name=NibleCounter.__name__)
+
+		self.flipflops = [DFlipFlop() for i in range(0, 4)]
+
+		self.addInput(self.Clk)
+		self.addOutput(self.Q0)
+		self.addOutput(self.Q1)
+		self.addOutput(self.Q2)
+		self.addOutput(self.Q3)
+
+	def Clk(self, *args):
+		return self.flipflops[0].Clk(*args)
+	
+	def Q0(self, *args):
+		return self.flipflops[0].Q(*args)
+	
+	def Q1(self, *args):
+		return self.flipflops[1].Q(*args)
+	
+	def Q2(self, *args):
+		return self.flipflops[2].Q(*args)
+	
+	def Q3(self, *args):
+		return self.flipflops[3].Q(*args)
+	
+	def setInput(self, Clk):
+		self.Clk(Clk)
+
+	def getOutput(self):
+		return (self.Q0(), self.Q1(), self.Q2(), self.Q3())
+	
+	def process(self):
+		self.flipflops[0].Data(self.flipflops[0].Qn())
+		self.flipflops[0].process()
+
+		self.flipflops[1].Data(self.flipflops[1].Qn())
+		self.flipflops[1].Clk(self.flipflops[0].Q())
+		self.flipflops[1].process()
+
+		self.flipflops[2].Data(self.flipflops[2].Qn())
+		self.flipflops[2].Clk(self.flipflops[1].Q())
+		self.flipflops[2].process()
+		
+		self.flipflops[3].Data(self.flipflops[3].Qn())
+		self.flipflops[3].Clk(self.flipflops[2].Q())
+		self.flipflops[3].process()
+
+def testCounter(part):
+	print("Testing '{0}' part.".format(part.name))
+	print(counter.getLineTable())
+	for i in range(0, 2 ** counter.numOutputs):
+		counter.Clk(1)
+		counter.process()
+		print(counter)
+		counter.Clk(0)
+		counter.process()
+		print(counter)
+	print()
+
 if __name__ == "__main__":
 	app = TestApp()
 	app.run()
@@ -133,3 +198,5 @@ if __name__ == "__main__":
 	control.setInput(0, 0, *numToBits(4, instr.STOC))
 	clockPart(control)
 
+	counter = NibleCounter()
+	testCounter(counter)
