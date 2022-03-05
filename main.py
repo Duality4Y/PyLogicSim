@@ -11,7 +11,7 @@ from utils.TestUtils import numToBits, clockPart
 
 from devices.MC14K5 import MC14K5
 
-from interface.ui import TestApp
+# from interface.ui import TestApp
 
 """
 	inputs: Clk
@@ -23,7 +23,12 @@ class NibleCounter(Part):
 
 		self.flipflops = [DFlipFlop() for i in range(0, 4)]
 
+		self.and1 = And()
+		self.and2 = And()
+		self.and3 = And()
+
 		self.addInput(self.Clk)
+		self.addOutput(self.Co)
 		self.addOutput(self.Q0)
 		self.addOutput(self.Q1)
 		self.addOutput(self.Q2)
@@ -31,6 +36,9 @@ class NibleCounter(Part):
 
 	def Clk(self, *args):
 		return self.flipflops[0].Clk(*args)
+	
+	def Co(self, *args):
+		return self.and3.Q(*args)
 	
 	def Q0(self, *args):
 		return self.flipflops[0].Q(*args)
@@ -48,23 +56,90 @@ class NibleCounter(Part):
 		self.Clk(Clk)
 
 	def getOutput(self):
-		return (self.Q0(), self.Q1(), self.Q2(), self.Q3())
+		return (self.Co(), self.Q0(), self.Q1(), self.Q2(), self.Q3())
 	
 	def process(self):
-		self.flipflops[0].Data(self.flipflops[0].Qn())
-		self.flipflops[0].process()
+		prevFlipflop = None
+		for flipflop in self.flipflops:
+			if prevFlipflop:
+				flipflop.Clk(prevFlipflop.Q())
+			flipflop.Data(flipflop.Qn())
+			flipflop.process()
 
-		self.flipflops[1].Data(self.flipflops[1].Qn())
-		self.flipflops[1].Clk(self.flipflops[0].Q())
-		self.flipflops[1].process()
+			prevFlipflop = flipflop
 
-		self.flipflops[2].Data(self.flipflops[2].Qn())
-		self.flipflops[2].Clk(self.flipflops[1].Q())
-		self.flipflops[2].process()
+		self.and1.A(self.Q0())
+		self.and1.B(self.Q1())
+		self.and2.A(self.Q2())
+		self.and2.B(self.Q3())
+		self.and1.process()
+		self.and2.process()
+
+		self.and3.A(self.and1.Q())
+		self.and3.B(self.and2.Q())
+		self.and3.process()
+
+class ByteCounter(Part):
+	def __init__(self, *args, **kwargs):
+		super().__init__(name=ByteCounter.__name__)
+
+		self.counter1 = NibleCounter()
+		self.counter2 = NibleCounter()
+
+		self.addInput(self.Clk)
+		self.addOutput(self.Co)
+		self.addOutput(self.Q0)
+		self.addOutput(self.Q1)
+		self.addOutput(self.Q2)
+		self.addOutput(self.Q3)
+		self.addOutput(self.Q4)
+		self.addOutput(self.Q5)
+		self.addOutput(self.Q6)
+		self.addOutput(self.Q7)
 		
-		self.flipflops[3].Data(self.flipflops[3].Qn())
-		self.flipflops[3].Clk(self.flipflops[2].Q())
-		self.flipflops[3].process()
+	def Clk(self, *args):
+		return self.counter1.Clk(*args)
+	
+	def Co(self, *args):
+		return self.counter2.Co(*args)
+	
+	def Q0(self, *args):
+		return self.counter1.Q0(*args)
+	
+	def Q1(self, *args):
+		return self.counter1.Q1(*args)
+	
+	def Q2(self, *args):
+		return self.counter1.Q2(*args)
+	
+	def Q3(self, *args):
+		return self.counter1.Q3(*args)
+
+	def Q4(self, *args):
+		return self.counter2.Q0(*args)
+	
+	def Q5(self, *args):
+		return self.counter2.Q1(*args)
+	
+	def Q6(self, *args):
+		return self.counter2.Q2(*args)
+	
+	def Q7(self, *args):
+		return self.counter2.Q3(*args)
+	
+	def setInput(self, Clk):
+		self.Clk(Clk)
+	
+	def getOutput(self):
+		return (self.Co(), self.Q0(), self.Q1(),
+						   self.Q2(), self.Q3(),
+						   self.Q4(), self.Q5(),
+						   self.Q6(), self.Q7())
+	
+	def process(self):
+		self.counter1.process()
+		self.counter2.Clk(self.counter1.Co())
+		self.counter2.process()
 
 def testCounter(part):
 	print("Testing '{0}' part.".format(part.name))
@@ -79,9 +154,9 @@ def testCounter(part):
 	print()
 
 if __name__ == "__main__":
-	app = TestApp()
-	app.run()
-	exit()
+	# app = TestApp()
+	# app.run()
+	# exit()
 
 	testPart(And())
 	testPart(Or())
@@ -199,4 +274,7 @@ if __name__ == "__main__":
 	clockPart(control)
 
 	counter = NibleCounter()
+	testCounter(counter)
+
+	counter = ByteCounter()
 	testCounter(counter)
