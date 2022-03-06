@@ -72,5 +72,5 @@ class Part(object):
 		self.updateTable()
 
 	def __repr__(self):
-		states = [state() for state in (*self.inputs, *self.inputOutputs, *self.outputs)]
+		states = [state() for state in (*self.inputs, *self.outputs, *self.inputOutputs)]
 		return self.buildTable(states)
