@@ -5,7 +5,7 @@ from devices.MC14K5.MC14K5 import Instructions
 from partWidgets.widgets import PartControlBox
 from partWidgets.widgets import PartDisplayBox
 
-from utils.TestUtils import numToBits
+from utils.bitUtils import numToBits
 
 class InstrSelectBox(Box):
 	def __init__(self, *args, **kwargs):

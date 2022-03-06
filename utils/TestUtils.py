@@ -1,6 +1,3 @@
-def numToBits(length, number):
-	return [(number >> (length - i - 1)) & 0x01 for i in range(0, length)]
-
 def clockPart(part):
 	part.Clk(1)
 	part.process()
@@ -14,7 +11,7 @@ def getPulseShape(risingPulse):
 
 def testPart(part):
 	print("Testing '{0}' part.".format(part.name))
-	print(part.getLineTable())
+	print(part.lineTable)
 	for i in range(0, 2 ** part.numInputs):
 		inValues = []
 		for bitPos in range(0, part.numInputs):
@@ -41,13 +38,13 @@ def testFlipFlop(part):
 		for bitPos in range(0, part.numInputs):
 			inValues.insert(0, (i >> bitPos) & 0x01)
 		part.setInput(*inValues)
-		print(part.getLineTable())
+		print(part.lineTable)
 		toggleClk(part)
 	print()
 
 def testCounter(part):
 	print("Testing '{0}' part.".format(part.name))
-	print(part.getLineTable())
+	print(part.lineTable)
 	for i in range(0, 2 ** part.numOutputs):
 		part.Clk(1)
 		part.process()

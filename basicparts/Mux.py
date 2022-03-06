@@ -177,7 +177,7 @@ class DeMux(Part):
 
 def TestMux(part):
 	print("Testing '{0}' part.".format(part.name))
-	print(part.getLineTable())
+	print(part.lineTable)
 	for inputBit in range(0, 2 ** 2):
 		for i in range(0, 2 ** 2):
 			inValues = [0] * 4

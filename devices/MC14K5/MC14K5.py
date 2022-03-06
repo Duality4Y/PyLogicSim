@@ -675,7 +675,7 @@ class ControlUnit(Part):
 
 	def debugPrint(self, part):
 		print("part: {0}".format(part.name))
-		print(part.getLineTable())
+		print(part.lineTable)
 		print(part)
 
 	def printStates(self):
@@ -782,7 +782,7 @@ def TestLU():
 
 	for name, inputSet in inputTable:
 		print("Testing '{0}' functionality".format(name))
-		print(logicUnit.getLineTable())
+		print(logicUnit.lineTable)
 		for i in range(0, 4):
 			Data = (i & 0x01)
 			RIn = (i >> 1) & 0x01
