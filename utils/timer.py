@@ -1,9 +1,9 @@
 import time
 
 class TimedEvent(object):
-	def __init__(self):
+	def __init__(self, interval=1):
 		self.nextTime = 0
-		self.interval = 1
+		self.interval = interval
 
 		self.callback = None
 		self.stop()

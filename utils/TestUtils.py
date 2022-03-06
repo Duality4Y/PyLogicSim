@@ -44,3 +44,14 @@ def testFlipFlop(part):
 		print(part.getLineTable())
 		toggleClk(part)
 	print()
+
+def testCounter(part):
+	print("Testing '{0}' part.".format(part.name))
+	print(part.getLineTable())
+	for i in range(0, 2 ** part.numOutputs):
+		part.Clk(1)
+		part.process()
+		part.Clk(0)
+		part.process()
+		print(part)
+	print()

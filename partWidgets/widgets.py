@@ -33,7 +33,7 @@ class ClockControlWidget(Box):
 		self.enableClockButton.checkCallback = self.startClockTimedEvent, None
 		self.clockIndicator.watch(self.getClockState)
 
-		self.clockTimedEvent = TimedEvent()
+		self.clockTimedEvent = TimedEvent(interval=0.1)
 
 		self.outputWire = None
 	
