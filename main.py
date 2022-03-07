@@ -6,20 +6,22 @@ from basicparts.Adder import HalfAdder, FullAdder
 from basicparts.Mux import Mux, DeMux, TestMux
 from basicparts.Encoder import Decoder
 from basicparts.Counter import NibbleCounter, ByteCounter
+from basicparts.Memory import FMemory
 
 from utils.TestUtils import testPart, testFlipFlop
 from utils.TestUtils import clockPart
 from utils.TestUtils import testCounter
+from utils.TestUtils import testFMemory
 from utils.bitUtils import numToBits
 
 from devices.MC14K5 import MC14K5
 
 
 if __name__ == "__main__":
-	from interface.ui import TestApp
-	app = TestApp()
-	app.run()
-	exit()
+	# from interface.ui import TestApp
+	# app = TestApp()
+	# app.run()
+	# exit()
 
 	testPart(And())
 	testPart(Or())
@@ -60,84 +62,87 @@ if __name__ == "__main__":
 	instr = MC14K5.Instructions()
 	control = MC14K5.ControlUnit()
 
-	# print("-> input enable.")
-	# control.setInput(0, 1, *numToBits(4, instr.IEN))
-	# clockPart(control)
-	# print("-> LD(1) and STO(1) test.")
-	# control.setInput(0, 1, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 1, *numToBits(4, instr.STO))
-	# clockPart(control)
-	# print("-> LD(0) and STO(0) test.")
-	# control.setInput(0, 0, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 1, *numToBits(4, instr.STO))
-	# clockPart(control)
+	print("-> input enable.")
+	control.setInput(0, 1, *numToBits(4, instr.IEN))
+	clockPart(control)
+	print("-> LD(1) and STO(1) test.")
+	control.setInput(0, 1, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.STO))
+	clockPart(control)
+	print("-> LD(0) and STO(0) test.")
+	control.setInput(0, 0, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.STO))
+	clockPart(control)
 
-	# print("-> LD(1) and STOC(1) test.")
-	# control.setInput(0, 1, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 1, *numToBits(4, instr.STOC))
-	# clockPart(control)
-	# print("-> LD(0) and STOC(0) test.")
-	# control.setInput(0, 0, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 1, *numToBits(4, instr.STOC))
-	# clockPart(control)
+	print("-> LD(1) and STOC(1) test.")
+	control.setInput(0, 1, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.STOC))
+	clockPart(control)
+	print("-> LD(0) and STOC(0) test.")
+	control.setInput(0, 0, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.STOC))
+	clockPart(control)
 
-	# print("-> output enable.")
-	# control.setInput(0, 1, *numToBits(4, instr.OEN))
-	# clockPart(control)
-	# control.setInput(0, 1, *numToBits(4, instr.STO))
-	# clockPart(control)
+	print("-> output enable.")
+	control.setInput(0, 1, *numToBits(4, instr.OEN))
+	clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.STO))
+	clockPart(control)
 
 
-	# print("-> write 1 through loading zero and storing the complement.")
-	# control.setInput(0, 1, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 0, *numToBits(4, instr.STOC))
-	# clockPart(control)
-	# control.setInput(0, 0, *numToBits(4, instr.OEN))
-	# clockPart(control)
+	print("-> write 1 through loading zero and storing the complement.")
+	control.setInput(0, 1, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.STOC))
+	clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.OEN))
+	clockPart(control)
 
-	# control.setInput(0, 0, *numToBits(4, instr.LD))
-	# clockPart(control)
-	# control.setInput(0, 0, *numToBits(4, instr.STOC))
-	# clockPart(control)
-	# control.setInput(0, 0, *numToBits(4, instr.OEN))
-	# clockPart(control)
-	# control.setInput(0, 0, *numToBits(4, instr.STOC))
-	# clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.LD))
+	clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.STOC))
+	clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.OEN))
+	clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.STOC))
+	clockPart(control)
 
-	# control.setInput(0, 0, *numToBits(4, instr.OEN))
-	# clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.OEN))
+	clockPart(control)
 
-	# control.setInput(0, 1, *numToBits(4, instr.OEN))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.OEN))
+	clockPart(control)
 
-	# control.setInput(0, 1, *numToBits(4, instr.NOPO))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.NOPO))
+	clockPart(control)
 
-	# control.setInput(0, 1, *numToBits(4, instr.NOPF))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.NOPF))
+	clockPart(control)
 
-	# control.setInput(0, 1, *numToBits(4, instr.SKZ))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.SKZ))
+	clockPart(control)
 
-	# control.setInput(0, 1, *numToBits(4, instr.RTN))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.RTN))
+	clockPart(control)
 	
-	# control.setInput(0, 1, *numToBits(4, instr.JMP))
-	# clockPart(control)
+	control.setInput(0, 1, *numToBits(4, instr.JMP))
+	clockPart(control)
 
-	# control.setInput(0, 0, *numToBits(4, instr.STO))
-	# clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.STO))
+	clockPart(control)
 
-	# control.setInput(0, 0, *numToBits(4, instr.STOC))
-	# clockPart(control)
+	control.setInput(0, 0, *numToBits(4, instr.STOC))
+	clockPart(control)
 
-	# counter = NibbleCounter()
+	counter = NibbleCounter()
+	testCounter(counter)
+
+	counter = ByteCounter()
 	# testCounter(counter)
 
-	# counter = ByteCounter()
-	# testCounter(counter)
+	testFMemory(FMemory())
+	

@@ -13,43 +13,6 @@ class TestApp(App):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-		memory = FMemory()
-		print(memory.lineTable)
-		
-		dataBits = numToBits(8, 0x0F)
-		addrBits = numToBits(12, 1024)
-		memory.setInput(addrBits, dataBits)
-		memory.WE(0)
-		memory.process()
-		print(memory)
-
-		addrBits = numToBits(12, 1025)
-		memory.setInput(addrBits)
-		memory.WE(1)
-		memory.process()
-		print(memory)
-		
-		dataBits = numToBits(8, 0x0F)
-		addrBits = numToBits(12, 10)
-		memory.setInput(addrBits, dataBits)
-		memory.WE(0)
-		memory.process()
-		print(memory)
-
-		addrBits = numToBits(12, 11)
-		memory.setInput(addrBits)
-		memory.WE(1)
-		memory.process()
-		print(memory)
-
-		addrBits = numToBits(12, 10)
-		memory.setInput(addrBits)
-		memory.WE(1)
-		memory.process()
-		print(memory)
-		
-		exit()
-
 
 		# counter = NibbleCounter()
 		# counter = ByteCounter()
